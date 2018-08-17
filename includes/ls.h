@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/09 06:04:04 by aroi             ###   ########.fr       */
+/*   Updated: 2018/08/17 15:25:08 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,10 @@ typedef struct		s_options
 typedef struct		s_ls
 {
 	t_options		flags;
+	char			*name;
 	char			*path;
 	char			type;
 	struct s_ls		*next;
-	struct s_ls		*prev;
-	struct s_ls		*parent;
-	struct s_ls		*child;
 }					t_ls;
 
 #endif
