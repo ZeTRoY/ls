@@ -6,13 +6,14 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:28:36 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/20 08:00:41 by aroi             ###   ########.fr       */
+/*   Updated: 2018/08/21 10:27:27 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //
 //	What does "unknown" type of file mean?
 //	should errors output to standart or errorr output
+//	error leaks
 //
 
 #include "ls.h"
@@ -43,6 +44,7 @@ void	usage(char c) //should be illegal option here?
 {
 	ft_printf("./ft_ls: illegal option -- %c\n", c);
 	ft_printf("usage: ./ft_ls [-Ralrt1] [file ...]\n");
+	system("leaks ft_ls");
 	exit(1);
 }
 
@@ -245,18 +247,18 @@ char		what_type_is(__uint8_t type)
 // 	return (ls);
 // }
 
-t_options	new_flags()
-{
-	t_options flags;
+// t_options	new_flags()
+// {
+// 	t_options flags;
 
-	flags.a = 0;
-	flags.R = 0;
-	flags.one = 0;
-	flags.r = 0;
-	flags.t = 0;
-	flags.l = 0;
-	return (flags);
-}
+// 	flags.a = 0;
+// 	flags.R = 0;
+// 	flags.one = 0;
+// 	flags.r = 0;
+// 	flags.t = 0;
+// 	flags.l = 0;
+// 	return (flags);
+// }
 
 // void		ls_add(t_ls **ls, struct dirent *ds)
 // {
@@ -270,15 +272,16 @@ t_options	new_flags()
 // }
 
 
-t_file		*new_file(t_options flags)
+t_file		*new_file()
 {
 	t_file	*file;
 
 	if (!(file = (t_file *)malloc(sizeof(t_file))))
 		return (NULL);
-	file->flags = flags;
+	file->flag = FG_C;
 	file->err = 0;
 	file->name = NULL;
+	file->path = NULL;
 	file->addr = file;
 	file->next = NULL;
 	file->dir = NULL;
@@ -292,15 +295,16 @@ void		add_file(t_file **file, char *str)
 	if (!(*file)->name)
 	{
 		(*file)->err = errno;
-		(*file)->name = str;
+		(*file)->name = ft_strdup(str);
 		return ;
 	}
 	tmp = (*file)->addr;
-	(*file)->next = new_file((*file)->flags);
+	(*file)->next = new_file();
 	(*file) = (*file)->next;
+	(*file)->flag = tmp->flag;
 	(*file)->err = errno;
 	(*file)->addr = tmp;
-	(*file)->name = str;
+	(*file)->name = ft_strdup(str);
 // 	new = ls_new();
 // 	new->flags = (*ls)->flags;
 // 	(*ls)->next = new;
@@ -308,32 +312,20 @@ void		add_file(t_file **file, char *str)
 // 	new->type = what_type_is(ds->d_type);
 }
 
-void		add_dir(t_file **dir, char *str)
+void		destroy_file(t_file **file)
 {
 	t_file *tmp;
 
-	if (!(*dir)->name)
-	{
-		(*dir)->err = errno;
-		(*dir)->name = str;
-		// ft_printf("str: %s and errno: %d\n", str, errno);
+	tmp = *file;
+	if (!*file)
 		return ;
-	}
-	tmp = (*dir)->addr;
-	(*dir)->next = new_file((*dir)->flags);
-	(*dir) = (*dir)->next;
-	(*dir)->err = errno;
-	(*dir)->addr = tmp;
-	(*dir)->name = str;
-	// ft_printf("str: %s and errno: %d\n", str, errno);
-// 	new = ls_new();
-// 	new->flags = (*ls)->flags;
-// 	(*ls)->next = new;
-// 	new->name = ds->d_name;
-// 	new->type = what_type_is(ds->d_type);
+	free(tmp->name);
+	if (tmp->path)
+		free(tmp->path);
+	*file = NULL;
 }
 
-void		add_not_a_dir(t_file **file, struct dirent *ds)
+/*void		add_not_a_dir(t_file **file, struct dirent *ds)
 {
 	t_file *tmp;
 
@@ -352,22 +344,31 @@ void		add_not_a_dir(t_file **file, struct dirent *ds)
 	// ft_printf("str: %s and errno: %d\n", str, errno);
 }
 
-// char		*make_new_path(char *path, char *str)
-// {
-// 	char	*new;
-// 	char	*tmp;
+void		make_new_path(t_file *dir, char *str)
+{
+	char	*now;
+	char	*tmp;
 
-// 	new = 0;
-// 	if (path)
-// 		new = ft_strjoin(path, "/");
-// 	tmp = new;
-// 	if (tmp && str)
-// 	{
-// 		new = ft_strjoin(tmp, str);
-// 		free(tmp);
-// 	}
-// 	return (new);
-// }
+	tmp = 0;
+	now = 0;
+	if (str)
+	{
+		if (dir && ft_strrchr(dir->path, '/') && dir->l_sign.type != 'l')
+		{
+			now = ft_strjoin(dir->path, "/");
+			tmp = ft_strjoin(now, str);
+			free(now);
+		}
+		else
+			tmp = ft_strjoin(dir->path, str);
+		if (!ft_strrchr(tmp, '/'))
+			dir->path = ft_strjoin(tmp, "/");
+		else
+			dir->path = ft_strsub(tmp, 0, );;
+		free(tmp);
+	}
+	printf("%s and %s\n", dir->path, str);
+}
 
 // int		find_friends(t_ls *ls, DIR *dir) //should be int return?
 // {
@@ -430,7 +431,10 @@ void		get_user_info(t_file *file, struct stat ds)
 	struct passwd	*pwuser;
 
 	if(!(pwuser = getpwuid(ds.st_uid)))
+	{
 		printf("Some problems with username\n");//lol1
+		exit(1);//delete later?
+	}
 	file->l_sign.user_name = ft_strdup(pwuser->pw_name); //don't forget to free
 	file->l_sign.uid = ds.st_uid;
 	if (file->flags.n)
@@ -449,7 +453,10 @@ void		get_group_info(t_file *file, struct stat ds)
 	struct group	*grpnam;
 
 	if (!(grpnam = getgrgid(ds.st_gid)))
+	{
 		printf("Some problems with groupname\n");//lol2
+		exit(1);//delete later?
+	}
 	file->l_sign.group_name = ft_strdup(grpnam->gr_name); //don't forget to free
 	file->l_sign.gid = ds.st_gid;
 	if (file->flags.n)
@@ -488,18 +495,30 @@ void		record_rights(t_file *file, __uint16_t mode)
 
 t_file		*add_long_format(t_file *file, __uint8_t type)
 {
+	char		*temp;
 	uintmax_t	tmp;
 	struct stat	dirstr;
 	
+	//  && file->path[ft_strlen(file->path) - 1] == '/'
 	file->rights[0] = what_type_is(type);
 	if (file->rights[0] == 'l')
 	{
-		if (lstat(file->name, &dirstr) == -1)
+		if (lstat((temp = ft_strjoin(file->path, file->name)), &dirstr) == -1)
 			error(file->name, strerror(errno));
 	}
+	// else if (file->rights[0] == 'l')
+	// {
+	// 	if (lstat((temp = ft_strsub(file->path, 0, ft_strlen(file->path) - 1)), &dirstr) == -1)
+	// 		error(file->name, strerror(errno));
+	// 	printf("omg: %s\n", temp);
+	// }
 	else
-		if (stat(file->name, &dirstr) == -1)
+	{
+		if (stat(temp = ft_strjoin(file->path, file->name), &dirstr) == -1)
 			error(file->name, strerror(errno));
+	}
+	printf("? %s\n", temp);
+	
 	file->addr->l_sign.ind.block = dirstr.st_blocks;
 	file->addr->l_sign.ind.total += dirstr.st_blocks;
 	file->l_sign.type = what_type_is(type);
@@ -514,6 +533,7 @@ t_file		*add_long_format(t_file *file, __uint8_t type)
 		file->addr->l_sign.ind.size = tmp;
 	file->l_sign.time = (time_t *)&dirstr.st_mtimespec;
 	get_time(file);
+	free(temp);
 	return (file);
 }
 
@@ -538,6 +558,7 @@ void		add_files_of_dir(t_file **tmp, struct dirent *ds)
 		(*tmp)->name = ds->d_name;
 	if ((*tmp)->flags.l)
 	{
+		(*tmp)->path = (*tmp)->addr->path;
 		if (*tmp == (*tmp)->addr)
 			create_indentation(*tmp);
 		add_long_format(*tmp, ds->d_type);
@@ -575,7 +596,7 @@ void		output_dir(t_file *ls)
 
 	tmp = ls;
 	if (ls->flags.l)
-		printf("total %d\n", ls->addr->l_sign.ind.total);
+		ft_printf("total %d\n", ls->addr->l_sign.ind.total);
 	while (tmp)
 	{
 		output_long(tmp);
@@ -590,6 +611,7 @@ void		open_dir(t_file **tmp)
 	struct dirent	*ds;
 
 	inner_file = new_file((*tmp)->flags);
+	inner_file->path = (*tmp)->path;
 	while ((ds = readdir((*tmp)->dir)))
 		add_files_of_dir(&inner_file, ds);
 	inner_file = inner_file->addr;
@@ -609,23 +631,12 @@ void		open_dir(t_file **tmp)
 	*tmp = (*tmp)->next;
 }
 
-void		output(t_file *file, t_file *dir, t_file *error)
+void		output(t_file *file, t_file *dir)
 {
 	// int		num;
 	t_file 	*tmp;
 
 	// num = 0;
-	if (error)
-	{
-		// num++;
-		sort(&error);
-		tmp = error;
-		while (tmp)
-		{
-			ft_printf("ft_ls: %s: %s\n", tmp->name, strerror(tmp->err));
-			tmp = tmp->next;
-		}
-	}
 	if (file->name)
 	{
 		sort(&file);
@@ -636,7 +647,7 @@ void		output(t_file *file, t_file *dir, t_file *error)
 				ft_printf("%s\n", tmp->name);
 			else if (tmp->flags.l)
 			{
-				ft_printf("%s", strerror(tmp->err));
+				// ft_printf("%s", strerror(tmp->err));
 				output_long(add_long_format(tmp, DT_REG));
 			}
 			tmp = tmp->next;
@@ -650,6 +661,7 @@ void		output(t_file *file, t_file *dir, t_file *error)
 		tmp = dir;
 		while (tmp)
 		{
+			printf("path: %s\n", tmp->path);
 			if (error || file->name || dir->next)
 				printf("%s:\n", tmp->name);
 			if (tmp->err && tmp->err != ENOTDIR)
@@ -664,79 +676,94 @@ void		output(t_file *file, t_file *dir, t_file *error)
 		}
 	}
 }
+*/
 
-void		enoent_err(t_file **error, char *str)
+void		output(t_file *file)
 {
-	t_options	flags;
-	t_file		*tmp;
-
-	flags = new_flags();
-	if (!*error)
+	t_file *tmp;
+	while (file)
 	{
-		*error = new_file((flags));
-		(*error)->err = errno;
-		(*error)->name = str;
-		return ;
+		if (file->name)
+			ft_printf("%s\n", file->name);
+		tmp = file;
+		file = file->next;
+		destroy_file(&tmp);
 	}
-	tmp = (*error)->addr;
-	(*error)->next = new_file(flags);
-	(*error) = (*error)->next;
-	(*error)->err = errno;
-	(*error)->name = str;
-	(*error)->addr = tmp;
 }
 
-void		find_errors(t_file **file, t_file **dir, t_file **error, char *str)
+// t_file	*kkkk(t_file *file)
+// {
+// 	t_file	*new;
+
+// 	if (!file->name)
+// 	{
+// 		destroy_file(&file);
+// 		return (NULL);
+// 	}
+// 	new = new_file();
+// 	return (new);
+// }
+
+void		find_errors(t_file **file, t_file **dir, char *str)
 {
 	DIR		*direct;
 
-	if (!(direct = opendir(str)) || (str[ft_strlen(str) - 1] == '/' && errno == ENOTDIR))
-		enoent_err(error, str);
+	if ((!(direct = opendir(str)) && errno == ENOENT) ||  (str[ft_strlen(str) - 1] == '/' && errno == ENOTDIR))
+		error(str, strerror(errno));
 	else if (errno == ENOTDIR)
+	{
+		ft_printf("%s is a file!\n", str);
 		add_file(file, str);
+	}
 	else
 	{
-		add_dir(dir, str);
+		ft_printf("It's a dir!\n");
+		// if (str[0] != '.' && str[1] != '\0')
+		// 	make_new_path(*dir, str);
+		add_file(dir, str);
 		if ((*dir)->name)
 			(*dir)->dir = direct;
 	}
 	errno = 0;
 }
 
-void		ft_parse_options(t_options *flags, int argc, char **argv)
+int		ft_parse_options(t_file *file, int argc, char **argv)
 {
 	int			i;
 	int			j;
 
 	i = 0;
-	while (++i < argc && argv[i][0] == '-' && argv[i][1])
+	while (++i < argc && argv[i][0] == '-')
 	{
 		j = 0;
 		while (argv[i][++j])
 		{
-			flags->r = argv[i][j] == 'r' ? 1 : 0;
-			flags->t = argv[i][j] == 't' ? 1 : 0;
-			if (argv[i][j] == '1')
-			{
-				flags->l = 0;
-				flags->one = 1;
-			}
-			if (argv[i][j] == 'l')
-			{
-				flags->l = 1;
-				flags->one = 0;
-			}
-			if (argv[i][j] == 'R')
-				flags->R = 1;
-			if (argv[i][j] == 'a')
-				flags->a = 1;
-			if (argv[i][j] == '-')
-				return ;
-			if (argv[i][j] != 'R' && argv[i][j] != 't' && argv[i][j] != 'r' &&
-			argv[i][j] != 'l' && argv[i][j] != 'a' && argv[i][j] != '1')
+			file->flag |= argv[i][j] == 'a' ? FG_A : 0;
+			file->flag |= argv[i][j] == 'r' ? FG_R : 0;
+			file->flag |= argv[i][j] == 't' ? FG_T : 0;
+			file->flag = argv[i][j] == '1' ? ((file->flag | FG_ONE) & ~FG_C) & ~FG_L : file->flag;
+			file->flag = argv[i][j] == 'l' ? ((file->flag | FG_L) & ~FG_C) & ~FG_ONE : file->flag;
+			file->flag = argv[i][j] == 'C' ? ((file->flag | FG_C) & ~FG_ONE) & ~FG_L : file->flag;
+			file->flag |= argv[i][j] == 'R'? FG_RECUR : 0;
+			file->flag |= argv[i][j] == 'G' ? FG_COLOR : 0;
+			file->flag |= argv[i][j] == 'g' ? FG_G : 0;
+			file->flag |= argv[i][j] == 'h' ? FG_H : 0;
+			file->flag |= argv[i][j] == 'd' ? FG_D : 0;
+			file->flag |= argv[i][j] == 'f' ? FG_F : 0;
+			file->flag |= argv[i][j] == 'u' ? FG_U : 0;
+			file->flag |= argv[i][j] == 'm' ? FG_M : 0;
+			file->flag |= argv[i][j] == 'n' ? FG_N : 0;
+			if (argv[i][j] == '-' && !argv[i][j + 1])
+				return (i + 1);
+			if ((argv[i][j] != 'R' && argv[i][j] != 't' && argv[i][j] != 'r' &&
+				argv[i][j] != 'l' && argv[i][j] != 'a' && argv[i][j] != '1' && 
+				argv[i][j] != 'd' && argv[i][j] != 'f' && argv[i][j] != 'u' &&
+				argv[i][j] != 'm' && argv[i][j] != 'n' && argv[i][j] != 'G' &&
+				argv[i][j] != 'h' && argv[i][j] != 'C') || (argv[i][j] == '-' && argv[i][j + 1]))
 				usage(argv[i][j]);
 		}
 	}
+	return (i);
 }
 
 int		main(int argc, char **argv)
@@ -744,28 +771,25 @@ int		main(int argc, char **argv)
 	int			i;
 	t_file		*file;
 	t_file		*dir;
-	t_file		*error;
 
-	i = 1;
-	file = new_file(new_flags());
-	ft_parse_options(&file->flags, argc, argv);
-	dir = new_file(file->flags);
-	while (i < argc && argv[i][0] == '-' && argv[i][1])
-		i++;
-	if (argc - i == 0)
-		find_errors(&file, &dir, &error, ".");
-	else
+	file = new_file();
+	dir = new_file();
+	i = ft_parse_options(dir, argc, argv);
+	file->flag = dir->flag;
+	ft_quicksort_chars(argv, i, argc - 1);
+	// if (argc - i == 0)
+	// 	opendir(&file, ".");
+	if (argc - i > 0)
+	{
 		while (i < argc)
 		{
-			find_errors(&file, &dir, &error, argv[i]);
+			find_errors(&file, &dir, argv[i]);
 			i++;
 		}
-	if (file)
-		file = file->addr;
-	if (dir)
-		dir = dir->addr;
-	if (error)
-		error = error->addr;
-	output(file, dir, error);
+		output(file);
+	}
+	system("leaks ft_ls");
+	// file = kkkk(file->addr);
+	// output(file ? file->addr : NULL, dir ? dir->addr : NULL, error ? error->addr : NULL);
 	return (0);
 }

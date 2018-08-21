@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aroi <marvin@42.fr>                        +#+  +:+       +#+        */
+/*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/03/21 15:39:32 by aroi              #+#    #+#             */
-/*   Updated: 2018/07/30 12:30:05 by aroi             ###   ########.fr       */
+/*   Updated: 2018/08/21 08:11:46 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,5 +117,6 @@ int					ft_atoi_base(const char *str, int base);
 void				ft_delarr(void **arr, int y);
 int					ft_issign(char c);
 void				ft_capitalize(char *str);
+void				ft_quicksort_chars(char **arr, int start, int end);
 
 #endif

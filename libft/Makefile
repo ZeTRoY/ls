@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aroi <marvin@42.fr>                        +#+  +:+       +#+         #
+#    By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/05/14 17:42:00 by aroi              #+#    #+#              #
-#    Updated: 2018/08/07 12:07:52 by aroi             ###   ########.fr        #
+#    Updated: 2018/08/21 08:09:44 by aroi             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,6 +64,7 @@ FILES	=	color \
 			ft_putendl_fd \
 			ft_putnbr \
 			ft_putnbr_fd \
+			ft_quicksort_chars \
 			ft_strcat \
 			ft_strchr \
 			ft_strclr \

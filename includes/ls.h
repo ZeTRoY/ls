@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/20 05:54:25 by aroi             ###   ########.fr       */
+/*   Updated: 2018/08/21 10:02:38 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,21 @@
 # include <grp.h>
 # include <time.h>
 
-typedef struct		s_options
-{
-	char			R;
-	char			l;
-	char			one;
-	char			a;
-	char			r;
-	char			t;
-	char			n;
-}					t_options;
+# define FG_C		0x1
+# define FG_ONE		0x2
+# define FG_L		0x4
+# define FG_RECUR	0x8
+# define FG_A		0x10
+# define FG_R		0x20
+# define FG_T		0x40
+# define FG_D		0x80
+# define FG_G		0x100
+# define FG_F		0x200
+# define FG_COLOR	0x400
+# define FG_U		0x800
+# define FG_M		0x1000
+# define FG_N		0x2000
+# define FG_H		0x4000
 
 typedef struct		s_indent
 {
@@ -58,7 +63,7 @@ typedef struct		s_info
 
 typedef struct		s_file
 {
-	t_options		flags;
+	u_int16_t		flag;
 	int				err;
 	char			rights[12];
 	char			date[13];
@@ -67,7 +72,6 @@ typedef struct		s_file
 	struct s_file	*addr;
 	struct s_file	*next;
 	DIR				*dir;
-	t_info			l_sign;
 }					t_file;
 
 
