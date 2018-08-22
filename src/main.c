@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:28:36 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/21 10:27:27 by aroi             ###   ########.fr       */
+/*   Updated: 2018/08/22 20:28:27 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,6 +285,12 @@ t_file		*new_file()
 	file->addr = file;
 	file->next = NULL;
 	file->dir = NULL;
+	file->stat.ind.total = 0;
+	file->stat.ind.link = 0;
+	file->stat.ind.user = 0;
+	file->stat.ind.group = 0;
+	file->stat.ind.size = 0;
+	file->stat.ind.date = 0;
 	return (file);
 }
 
@@ -305,6 +311,7 @@ void		add_file(t_file **file, char *str)
 	(*file)->err = errno;
 	(*file)->addr = tmp;
 	(*file)->name = ft_strdup(str);
+	(*file)->path = ft_strdup(tmp->path);
 // 	new = ls_new();
 // 	new->flags = (*ls)->flags;
 // 	(*ls)->next = new;
@@ -319,9 +326,17 @@ void		destroy_file(t_file **file)
 	tmp = *file;
 	if (!*file)
 		return ;
-	free(tmp->name);
+	if (tmp->name)
+		free(tmp->name);
 	if (tmp->path)
 		free(tmp->path);
+	if (tmp->stat.user_name)
+		free(tmp->stat.user_name);
+	if (tmp->stat.group_name)
+		free(tmp->stat.group_name);
+	if (tmp->dir)
+		closedir(tmp->dir);
+	free(*file);
 	*file = NULL;
 }
 
@@ -342,34 +357,36 @@ void		destroy_file(t_file **file)
 	(*file)->addr = tmp;
 	(*file)->name = ds->d_name;
 	// ft_printf("str: %s and errno: %d\n", str, errno);
-}
+}*/
 
-void		make_new_path(t_file *dir, char *str)
+char		*make_new_path(t_file *dir)
 {
 	char	*now;
 	char	*tmp;
+	int i;
 
 	tmp = 0;
 	now = 0;
-	if (str)
+	i = 0;
+	if (!dir->name)
 	{
-		if (dir && ft_strrchr(dir->path, '/') && dir->l_sign.type != 'l')
-		{
-			now = ft_strjoin(dir->path, "/");
-			tmp = ft_strjoin(now, str);
-			free(now);
-		}
-		else
-			tmp = ft_strjoin(dir->path, str);
-		if (!ft_strrchr(tmp, '/'))
-			dir->path = ft_strjoin(tmp, "/");
-		else
-			dir->path = ft_strsub(tmp, 0, );;
-		free(tmp);
+		ft_printf("%s cannot be initialized.\n", dir->name);
+		return (NULL);
 	}
-	printf("%s and %s\n", dir->path, str);
+	if (!dir->path)
+		dir->path = ft_strjoin(dir->name, "/");
+	else
+	{
+		now = ft_strjoin(dir->path, dir->name);
+		free(dir->path);
+		dir->path = ft_strjoin(now, "/");
+		free(now);
+	}
+	// printf("%s and %s\n", dir->path, dir->name);
+	return (dir->path);
 }
 
+/*
 // int		find_friends(t_ls *ls, DIR *dir) //should be int return?
 // {
 // 	int				num;
@@ -563,34 +580,9 @@ void		add_files_of_dir(t_file **tmp, struct dirent *ds)
 			create_indentation(*tmp);
 		add_long_format(*tmp, ds->d_type);
 	}
-}
+}*/
 
-void		output_long(t_file *tmp)
-{
-	char	*buff;
-
-	if (tmp->flags.one)
-		ft_printf("%s\n", tmp->name);
-	if (tmp->flags.l)
-	{
-		tmp->l_sign.ind = tmp->addr->l_sign.ind;
-		// if (ls->flags.f ???????????)// uid and gid
-		ft_printf("%s %*d", tmp->rights, tmp->l_sign.ind.link, tmp->l_sign.link_num);
-		ft_printf("%*s %*s", tmp->l_sign.ind.user + 1, tmp->l_sign.user_name, tmp->l_sign.ind.group + 1, tmp->l_sign.group_name);
-		ft_printf("%*ld %s %s", tmp->l_sign.ind.size + 2, tmp->l_sign.size, tmp->date, tmp->name);
-		if (tmp->l_sign.type == 'l')
-		{
-			buff = ft_memalloc(4096);
-			buff[4096] ='\0';
-			readlink(tmp->name, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
-			ft_strdel(&buff);
-		}
-		else
-			ft_printf("\n");
-	}
-}
-
-void		output_dir(t_file *ls)
+/*void		output_dir(t_file *ls)
 {
 	t_file	*tmp;
 
@@ -678,31 +670,216 @@ void		output(t_file *file, t_file *dir)
 }
 */
 
+void		output_long(t_file *tmp)
+{
+	char	*buff;
+	char	*temp;
+	
+	tmp->stat.ind = tmp->addr->stat.ind;
+	ft_printf("%s %*d", tmp->rights, tmp->stat.ind.link, tmp->stat.link_num);
+	if (tmp->flag & FG_N)
+		ft_printf("%*d %*d", tmp->stat.ind.user + 1, tmp->stat.uid, tmp->stat.ind.group + 1, tmp->stat.gid);
+	else
+		ft_printf("%*s %*s", tmp->stat.ind.user + 1, tmp->stat.user_name, tmp->stat.ind.group + 1, tmp->stat.group_name);
+	ft_printf("%*d %s %s", tmp->stat.ind.size + 2, tmp->stat.size, tmp->date, tmp->name);
+	if (tmp->rights[0] == 'l')
+	{
+		temp = ft_strjoin(tmp->path, tmp->name);
+		buff = ft_memalloc(4096);
+		buff[4096] ='\0';
+		readlink(temp, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
+		free(buff);
+		free(temp);
+	}
+	else
+		ft_printf("\n");
+}
+
 void		output(t_file *file)
 {
 	t_file *tmp;
+
 	while (file)
 	{
 		if (file->name)
-			ft_printf("%s\n", file->name);
+		{
+			if (file->flag & FG_M && file->next)
+				ft_printf("%s, ", file->name);
+			else if ((file->flag & FG_ONE) || (file->flag & FG_M))
+				ft_printf("%s\n", file->name);
+			else if ((file->flag & FG_L) || (file->flag & FG_N))
+				output_long(file);
+		}
 		tmp = file;
 		file = file->next;
-		destroy_file(&tmp);
+		// destroy_file(&tmp);
 	}
 }
 
-// t_file	*kkkk(t_file *file)
-// {
-// 	t_file	*new;
+void		get_date(t_file *file, time_t *time_s)
+{
+	uintmax_t	tmp;
+	time_t		current_time;
+	time_t		difference;
+	char		*time_str;
 
-// 	if (!file->name)
-// 	{
-// 		destroy_file(&file);
-// 		return (NULL);
-// 	}
-// 	new = new_file();
-// 	return (new);
-// }
+	time_str = ctime(time_s);
+	time(&current_time);
+	ft_memcpy((void *)file->date, time_str + 4, 12);
+	file->date[12] = '\0';
+	if (current_time > *time_s)
+		difference = current_time - *time_s;
+	else
+		difference = *time_s - current_time;
+	if (difference > 15778463)
+	{
+		file->date[7] = ' ';
+		ft_memcpy((void *)(file->date + 8), time_str + 20, 4);
+	}
+	if ((tmp = ft_strlen(time_str)) > file->stat.ind.date)
+		file->stat.ind.date = tmp;
+}
+
+void		get_ug_indent(t_file *file)
+{
+	int				tmp;
+
+	if (file->flag & FG_N)
+	{
+		if ((tmp = ft_count_digits_base(file->stat.uid, 10)) > file->stat.ind.user)
+			file->stat.ind.user = tmp;
+		if ((tmp = ft_count_digits_base(file->stat.gid, 10)) > file->stat.ind.group)
+			file->stat.ind.group = tmp;
+	}
+	else
+	{
+		if ((tmp = ft_strlen(file->stat.user_name)) > file->stat.ind.user)
+			file->stat.ind.user = tmp;
+		if ((tmp = ft_strlen(file->stat.group_name)) > file->stat.ind.group)
+			file->stat.ind.group = tmp;
+	}
+}
+
+void		get_ug_name(t_file *file)
+{
+	struct passwd	*pwuser;
+	struct group	*grpnam;
+
+	if (!(pwuser = getpwuid(file->stat.uid)))
+	{
+		ft_printf("There's an error after trying to get user\n");
+		exit(errno);
+	}
+	if (!(grpnam = getgrgid(file->stat.gid)))
+	{
+		ft_printf("There's an error after trying to get group\n");
+		exit(errno);
+	}
+	file->stat.user_name = ft_strdup(pwuser->pw_name);
+	file->stat.group_name = ft_strdup(grpnam->gr_name);
+	get_ug_indent(file);
+}
+
+void		get_rights(t_file *file, mode_t mode)
+{
+	if (S_ISBLK(mode) || S_ISCHR(mode))
+		file->rights[0] = S_ISBLK(mode) ? 'b' : 'c';
+	else if (S_ISDIR(mode) || S_ISFIFO(mode))
+		file->rights[0] = S_ISDIR(mode) ? 'd' : 'p';
+	else if (S_ISLNK(mode) || S_ISREG(mode))
+		file->rights[0] = S_ISLNK(mode) ? 'l' : '-';
+	else
+		file->rights[0] = S_ISSOCK(mode)? 's' : file->rights[0];
+	file->rights[1] = mode & S_IRUSR ? 'r' : '-';
+	file->rights[2] = mode & S_IWUSR ? 'w' : '-';
+	if (mode & S_ISUID)
+		file->rights[3] = mode & S_IXUSR ? 's' : 'S';
+	else
+		file->rights[3] = mode & S_IXUSR ? 'x' : '-';
+	file->rights[4] = mode & S_IRGRP ? 'r' : '-';
+	file->rights[5] = mode & S_IWGRP ? 'w' : '-';
+	if (mode & S_ISGID)
+		file->rights[6] = mode & S_IXGRP ? 's' : 'S';
+	else
+		file->rights[6] = mode & S_IXGRP ? 'x' : '-';
+	file->rights[7] = mode & S_IROTH ? 'r' : '-';
+	file->rights[8] = mode & S_IWOTH ? 'r' : '-';
+	if (mode & S_ISVTX)
+		file->rights[9] = mode & S_IXOTH ? 't' : 'T';
+	else
+		file->rights[9] = mode & S_IXOTH ? 'x' : '-';
+}
+
+void		get_stats(t_file *file)
+{
+	char		*temp;
+	int			tmp;
+	struct stat	ds;
+
+	temp = ft_strjoin(file->path, file->name);
+	if (lstat(temp, &ds) < 0)
+		if (stat(temp, &ds) < 0)
+			error(file->name, strerror(errno));
+	file->stat.ind = file->addr->stat.ind;
+	get_rights(file, ds.st_mode);
+	file->rights[10] = ' ';
+	file->rights[11] = '\0';
+	file->stat.link_num = ds.st_nlink;
+	if ((tmp = ft_count_digits_base(ds.st_nlink, 10)) > file->stat.ind.link)
+		file->stat.ind.link = tmp;
+	file->stat.uid = ds.st_uid;
+	file->stat.gid = ds.st_gid;
+	get_ug_name(file);
+	file->stat.size = ds.st_size;
+	if ((tmp = ft_count_digits_base(ds.st_size, 10)) > file->stat.ind.size)
+		file->stat.ind.size = tmp;
+	get_date(file, &ds.st_mtime);
+	file->stat.ind.total += ds.st_blocks;
+	file->addr->stat.ind = file->stat.ind;
+	free(temp);
+}
+
+void		open_dir(t_file *dir)
+{
+	struct dirent	*dir_s;
+	t_file			*new_dir;
+	t_file			*tmp;
+
+
+		new_dir = new_file();
+		new_dir->flag = dir->flag;
+		if (dir->flag & WR_PTH)
+			ft_printf("%s:\n", dir->path ? dir->path : dir->name);
+		if (dir->name[0] != '.' && dir->name[1] != '\0')
+			new_dir->path = make_new_path(dir);
+		while ((dir_s = readdir(dir->dir)))
+		{
+			if ((dir->flag & FG_A) || dir_s->d_name[0] != '.')
+			{
+				add_file(&new_dir, dir_s->d_name);
+				get_stats(new_dir);
+			}
+		}
+		tmp = dir;
+		dir = dir->next;
+		// destroy_file(&tmp);
+		new_dir = new_dir->addr;
+		sort(&new_dir);
+		if ((new_dir->flag & FG_L) || (new_dir->flag & FG_N))
+			ft_printf("total %d\n", new_dir->stat.ind.total);
+		while (new_dir && new_dir->name)
+		{
+			if ((new_dir->flag & FG_L) || (new_dir->flag & FG_N))
+				output_long(new_dir);
+			if (new_dir->flag & FG_ONE)
+				ft_printf("%s\n", new_dir->name);
+			tmp = new_dir;
+			new_dir = new_dir->next;
+			// destroy_file(&tmp);
+		}
+		if (dir)
+			write(1, "\n", 1);
+}
 
 void		find_errors(t_file **file, t_file **dir, char *str)
 {
@@ -712,15 +889,13 @@ void		find_errors(t_file **file, t_file **dir, char *str)
 		error(str, strerror(errno));
 	else if (errno == ENOTDIR)
 	{
-		ft_printf("%s is a file!\n", str);
 		add_file(file, str);
+		get_stats(*file);
 	}
 	else
 	{
-		ft_printf("It's a dir!\n");
-		// if (str[0] != '.' && str[1] != '\0')
-		// 	make_new_path(*dir, str);
 		add_file(dir, str);
+		get_stats(*dir);
 		if ((*dir)->name)
 			(*dir)->dir = direct;
 	}
@@ -738,28 +913,29 @@ int		ft_parse_options(t_file *file, int argc, char **argv)
 		j = 0;
 		while (argv[i][++j])
 		{
-			file->flag |= argv[i][j] == 'a' ? FG_A : 0;
-			file->flag |= argv[i][j] == 'r' ? FG_R : 0;
-			file->flag |= argv[i][j] == 't' ? FG_T : 0;
-			file->flag = argv[i][j] == '1' ? ((file->flag | FG_ONE) & ~FG_C) & ~FG_L : file->flag;
-			file->flag = argv[i][j] == 'l' ? ((file->flag | FG_L) & ~FG_C) & ~FG_ONE : file->flag;
-			file->flag = argv[i][j] == 'C' ? ((file->flag | FG_C) & ~FG_ONE) & ~FG_L : file->flag;
-			file->flag |= argv[i][j] == 'R'? FG_RECUR : 0;
-			file->flag |= argv[i][j] == 'G' ? FG_COLOR : 0;
-			file->flag |= argv[i][j] == 'g' ? FG_G : 0;
-			file->flag |= argv[i][j] == 'h' ? FG_H : 0;
-			file->flag |= argv[i][j] == 'd' ? FG_D : 0;
-			file->flag |= argv[i][j] == 'f' ? FG_F : 0;
-			file->flag |= argv[i][j] == 'u' ? FG_U : 0;
-			file->flag |= argv[i][j] == 'm' ? FG_M : 0;
-			file->flag |= argv[i][j] == 'n' ? FG_N : 0;
-			if (argv[i][j] == '-' && !argv[i][j + 1])
+			if (argv[i][j] == 'a' || argv[i][j] == 'f')
+				file->flag |= argv[i][j] == 'f' ? FG_A | FG_F : FG_F;
+			else if (argv[i][j] == '1' || argv[i][j] == 'r')
+				file->flag |= argv[i][j] == 'r' ? FG_R : (((file->flag | FG_ONE)
+					& ~FG_C) & ~FG_L) & ~FG_M;
+			else if (argv[i][j] == 'l' || argv[i][j] == 'n')
+				file->flag |= argv[i][j] == 'l' ? ((((file->flag | FG_L) &
+					~FG_C) & ~FG_ONE) & ~FG_M) | FG_F : FG_L | FG_N;
+			else if (argv[i][j] == 'g' || argv[i][j] == 'G')
+				file->flag |= argv[i][j] == 'g' ? FG_L | FG_G : FG_COLOR;
+			else if (argv[i][j] == 't' || argv[i][j] == 'u')
+				file->flag |= argv[i][j] == 'u' ? FG_U : FG_T;
+			else if (argv[i][j] == 'R' || argv[i][j] == 'd')
+				file->flag |= argv[i][j] == 'R' ? FG_RECUR : ~FG_RECUR | FG_D;
+			else if (argv[i][j] == 'm')
+				file->flag |= ((FG_M & ~FG_ONE) & ~FG_L) & ~FG_C;
+			else if (argv[i][j] == 'C' && !(file->flag & FG_M))
+				file->flag |= (FG_C & ~FG_ONE) & ~FG_L;
+			else if (argv[i][j] == 'h')
+				file->flag |= FG_H;
+			else if (argv[i][j] == '-' && !argv[i][j + 1])
 				return (i + 1);
-			if ((argv[i][j] != 'R' && argv[i][j] != 't' && argv[i][j] != 'r' &&
-				argv[i][j] != 'l' && argv[i][j] != 'a' && argv[i][j] != '1' && 
-				argv[i][j] != 'd' && argv[i][j] != 'f' && argv[i][j] != 'u' &&
-				argv[i][j] != 'm' && argv[i][j] != 'n' && argv[i][j] != 'G' &&
-				argv[i][j] != 'h' && argv[i][j] != 'C') || (argv[i][j] == '-' && argv[i][j + 1]))
+			else
 				usage(argv[i][j]);
 		}
 	}
@@ -775,10 +951,14 @@ int		main(int argc, char **argv)
 	file = new_file();
 	dir = new_file();
 	i = ft_parse_options(dir, argc, argv);
-	file->flag = dir->flag;
 	ft_quicksort_chars(argv, i, argc - 1);
-	// if (argc - i == 0)
-	// 	opendir(&file, ".");
+	if (argc - i == 0)
+	{
+		find_errors(&file, &dir, ".");
+		open_dir(dir->addr);
+	}
+	argc - i > 1 ? dir->flag |= WR_PTH : 0;
+	file->flag = dir->flag;
 	if (argc - i > 0)
 	{
 		while (i < argc)
@@ -786,10 +966,18 @@ int		main(int argc, char **argv)
 			find_errors(&file, &dir, argv[i]);
 			i++;
 		}
-		output(file);
+		if (file->name)
+		{
+			output(file->addr);
+			dir->name ? write(1, "\n", 1): 0;
+		}
+		while (dir && dir->dir)
+		{
+			open_dir(dir->addr);
+			dir = dir->next;
+		}
 	}
-	system("leaks ft_ls");
-	// file = kkkk(file->addr);
+	// system("leaks ft_ls");
 	// output(file ? file->addr : NULL, dir ? dir->addr : NULL, error ? error->addr : NULL);
 	return (0);
 }

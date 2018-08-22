@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/21 10:02:38 by aroi             ###   ########.fr       */
+/*   Updated: 2018/08/22 17:19:35 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,11 @@
 # define FG_M		0x1000
 # define FG_N		0x2000
 # define FG_H		0x4000
+# define WR_PTH		0x8000
 
 typedef struct		s_indent
 {
 	intmax_t		total;
-	u_int16_t		block;
 	u_int16_t		link;
 	u_int16_t		user;
 	u_int16_t		group;
@@ -50,20 +50,19 @@ typedef struct		s_indent
 
 typedef struct		s_info
 {
-	char			type;
 	int				link_num;
 	int				uid;
 	int				gid;
 	char			*user_name;
 	char			*group_name;
-	time_t			*time;
 	uintmax_t		size;
+	time_t			*time;
 	t_indent		ind;
 }					t_info;
 
 typedef struct		s_file
 {
-	u_int16_t		flag;
+	u_int32_t		flag;
 	int				err;
 	char			rights[12];
 	char			date[13];
@@ -72,7 +71,7 @@ typedef struct		s_file
 	struct s_file	*addr;
 	struct s_file	*next;
 	DIR				*dir;
+	t_info			stat;
 }					t_file;
-
 
 #endif
