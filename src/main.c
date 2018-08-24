@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:28:36 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/22 20:28:27 by aroi             ###   ########.fr       */
+/*   Updated: 2018/08/24 16:53:51 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,76 +23,31 @@
 // #include <pwd.h>
 // #include <grp.h>
 
-char	*find_str(char *name)
-{
-	char *str;
+// char	*find_str(char *name)
+// {
+// 	char *str;
 
-	str = ft_strrchr(name, '/');
-	if (!str)
-		str = name;
-	else
-		str++;
-	return (str);
+// 	str = ft_strrchr(name, '/');
+// 	if (!str)
+// 		str = name;
+// 	else
+// 		str++;
+// 	return (str);
+// }
+
+void	error(char *str)
+{
+	write(2, "ls: ", 4);
+	perror(str);
 }
 
-void	error(char *name, char *strerr)
+void	usage(char c) //should be illegal option here? is ./ft_ls ?
 {
-	ft_printf("ft_ls: %s: %s\n", find_str(name), strerr);
-}
-
-void	usage(char c) //should be illegal option here?
-{
-	ft_printf("./ft_ls: illegal option -- %c\n", c);
-	ft_printf("usage: ./ft_ls [-Ralrt1] [file ...]\n");
+	ft_printf("ls: illegal option -- %c\n", c);
+	ft_printf("usage: ls [-Ralrt1] [file ...]\n");
 	system("leaks ft_ls");
 	exit(1);
 }
-
-// void	ft_get_data(t_ls *ls)
-// {}
-
-// int		ft_ls(t_ls *ls, char *str)
-// {
-// 	DIR				*dir;
-// 	struct dirent	*ds;
-// 	struct stat		sts;
-// 	struct passwd *pwuser;
-// 	struct group *grpnam;
-
-// 	ls->str = str;
-// 	if (!(dir = opendir(str)) && errno != 20)
-// 		error(str, strerror(errno));
-// 	if (errno == 20)
-// 	{
-// 		ft_printf("%s\n", str);
-// 		return (0);
-// 	}
-// 	while ((ds = readdir(dir)))
-// 	{
-// 		if (!ls->a && ds->d_name[0] == '.')
-// 			continue;
-// 		if (ls->l)
-// 			ft_get_data(ls);
-// 		// ft_printf("%s\n\n", ds->d_name);
-// 		stat(ds->d_name, &sts);
-// 		pwuser = getpwuid(sts.st_uid);
-// 		grpnam = getgrgid(sts.st_gid);
-// 		ft_printf("%s:\n", ds->d_name);
-// 		if (S_IFDIR == sts.st_mode)
-// 			printf("KEK\n");
-// 		ft_printf("\tType: %u\n", sts.st_mode);
-// 		ft_printf("\t%s\n", pwuser->pw_name);
-// 		ft_printf("\t%s\n", grpnam->gr_name);
-// 		ft_printf("\tperms: %o\n", sts.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
-// 		ft_printf("\tlinks: %d\n", sts.st_nlink);
-// 		ft_printf("\tsize: %ld\n", sts.st_size); /* you may use %lld */
-// 		ft_printf("\tatime: %s", ctime(&sts.st_atime));
-// 		ft_printf("\tmtime: %s", ctime(&sts.st_mtime));
-// 		ft_printf("\tctime: %s\n", ctime(&sts.st_ctime));
-// 	}
-// 	closedir(dir);
-// 	return (0);
-// }
 
 t_file	*end_of_list(t_file *ls)
 {
@@ -229,49 +184,6 @@ char		what_type_is(__uint8_t type)
 	return ('*');
 }
 
-// t_ls	*ls_new(void)
-// {
-// 	t_ls *ls;
-
-// 	if (!(ls = (t_ls *)malloc(sizeof(t_ls))))
-// 		return (0);
-// 	ls->flags.R = 0;
-// 	ls->flags.one = 0;
-// 	ls->flags.l = 0;
-// 	ls->flags.a = 0;
-// 	ls->flags.t = 0;
-// 	ls->flags.r = 0;
-// 	ls->name = 0;
-// 	ls->path = 0;
-// 	ls->next = 0;
-// 	return (ls);
-// }
-
-// t_options	new_flags()
-// {
-// 	t_options flags;
-
-// 	flags.a = 0;
-// 	flags.R = 0;
-// 	flags.one = 0;
-// 	flags.r = 0;
-// 	flags.t = 0;
-// 	flags.l = 0;
-// 	return (flags);
-// }
-
-// void		ls_add(t_ls **ls, struct dirent *ds)
-// {
-// 	t_ls	*new;
-
-// 	new = ls_new();
-// 	new->flags = (*ls)->flags;
-// 	(*ls)->next = new;
-// 	new->name = ds->d_name;
-// 	new->type = what_type_is(ds->d_type);
-// }
-
-
 t_file		*new_file()
 {
 	t_file	*file;
@@ -279,44 +191,37 @@ t_file		*new_file()
 	if (!(file = (t_file *)malloc(sizeof(t_file))))
 		return (NULL);
 	file->flag = FG_C;
-	file->err = 0;
 	file->name = NULL;
+	file->user = NULL;
+	file->group = NULL;
 	file->path = NULL;
+	// file->size = NULL;
 	file->addr = file;
 	file->next = NULL;
-	file->dir = NULL;
-	file->stat.ind.total = 0;
-	file->stat.ind.link = 0;
-	file->stat.ind.user = 0;
-	file->stat.ind.group = 0;
-	file->stat.ind.size = 0;
-	file->stat.ind.date = 0;
+	file->ind.date = 1;
+	file->ind.group = 1;
+	file->ind.link = 1;
+	file->ind.user = 1;
+	file->ind.size = 1;
+	file->ind.total = 0;
 	return (file);
 }
 
-void		add_file(t_file **file, char *str)
+int		add_file(t_file **file, char *str)
 {
 	t_file *tmp;
 
-	if (!(*file)->name)
+	if ((*file)->name)
 	{
-		(*file)->err = errno;
-		(*file)->name = ft_strdup(str);
-		return ;
+		tmp = (*file)->addr;
+		(*file)->next = new_file();
+		(*file) = (*file)->next;
+		(*file)->flag = tmp->flag;
+		(*file)->addr = tmp;
 	}
-	tmp = (*file)->addr;
-	(*file)->next = new_file();
-	(*file) = (*file)->next;
-	(*file)->flag = tmp->flag;
-	(*file)->err = errno;
-	(*file)->addr = tmp;
+	ft_strdel(&(*file)->name);
 	(*file)->name = ft_strdup(str);
-	(*file)->path = ft_strdup(tmp->path);
-// 	new = ls_new();
-// 	new->flags = (*ls)->flags;
-// 	(*ls)->next = new;
-// 	new->name = ds->d_name;
-// 	new->type = what_type_is(ds->d_type);
+	return (1);
 }
 
 void		destroy_file(t_file **file)
@@ -324,101 +229,36 @@ void		destroy_file(t_file **file)
 	t_file *tmp;
 
 	tmp = *file;
-	if (!*file)
+	if (!tmp)
 		return ;
-	if (tmp->name)
-		free(tmp->name);
-	if (tmp->path)
-		free(tmp->path);
-	if (tmp->stat.user_name)
-		free(tmp->stat.user_name);
-	if (tmp->stat.group_name)
-		free(tmp->stat.group_name);
-	if (tmp->dir)
-		closedir(tmp->dir);
-	free(*file);
+	free(tmp->name);
+	ft_strdel(&tmp->path);
+	free(tmp->user);
+	free(tmp->group);
+	free(tmp);
 	*file = NULL;
 }
 
-/*void		add_not_a_dir(t_file **file, struct dirent *ds)
+char		*make_new_path(char *path, char *str)
 {
-	t_file *tmp;
-
-	if (!(*file)->name)
-	{
-		(*file)->err = errno;
-		(*file)->name = ds->d_name;
-		return ;
-	}
-	tmp = (*file)->addr;
-	(*file)->next = new_file((*file)->flags);
-	(*file) = (*file)->next;
-	(*file)->err = errno;
-	(*file)->addr = tmp;
-	(*file)->name = ds->d_name;
-	// ft_printf("str: %s and errno: %d\n", str, errno);
-}*/
-
-char		*make_new_path(t_file *dir)
-{
-	char	*now;
+	char	*new;
 	char	*tmp;
-	int i;
 
 	tmp = 0;
-	now = 0;
-	i = 0;
-	if (!dir->name)
-	{
-		ft_printf("%s cannot be initialized.\n", dir->name);
-		return (NULL);
-	}
-	if (!dir->path)
-		dir->path = ft_strjoin(dir->name, "/");
+	new = 0;
+	if (!path)
+		new = ft_strdup(str);
 	else
 	{
-		now = ft_strjoin(dir->path, dir->name);
-		free(dir->path);
-		dir->path = ft_strjoin(now, "/");
-		free(now);
+		tmp = ft_strjoin(path, "/");
+		new = ft_strjoin(tmp, str);
+		free(tmp);
 	}
 	// printf("%s and %s\n", dir->path, dir->name);
-	return (dir->path);
+	return (new);
 }
 
-/*
-// int		find_friends(t_ls *ls, DIR *dir) //should be int return?
-// {
-// 	int				num;
-// 	struct dirent	*ds;
-// 	t_ls			*tmp;
-
-// 	num = 0;
-// 	tmp = ls;
-// 	while ((ds = readdir(dir)))
-// 	{
-// 		if (!tmp->flags.a && ds->d_name[0] == '.')
-// 			continue;
-// 		if (num > 0)
-// 		{
-// 			ls_add(&tmp, ds);
-// 			tmp = tmp->next;
-// 			// printf("next: %c is for %s\n", tmp->type, ds->d_name);
-// 		}
-// 		else
-// 		{
-// 			tmp->type = what_type_is(ds->d_type);
-// 			tmp->name = ds->d_name;
-// 			// printf("first: %c is for %s\n", tmp->type, ds->d_name);
-// 		}
-// 		// tmp->nbr = num++;
-// 		num++;
-// 	}
-// 	closedir(dir);
-// 	return (num);
-// }
-
-void		get_time(t_file *file)
+/*void		get_time(t_file *file)
 {
 	uintmax_t	tmp;
 	time_t		current_time;
@@ -670,74 +510,74 @@ void		output(t_file *file, t_file *dir)
 }
 */
 
-void		output_long(t_file *tmp)
-{
-	char	*buff;
-	char	*temp;
+// void		output_long(t_file *tmp)
+// {
+// 	char	*buff;
+// 	char	*temp;
 	
-	tmp->stat.ind = tmp->addr->stat.ind;
-	ft_printf("%s %*d", tmp->rights, tmp->stat.ind.link, tmp->stat.link_num);
-	if (tmp->flag & FG_N)
-		ft_printf("%*d %*d", tmp->stat.ind.user + 1, tmp->stat.uid, tmp->stat.ind.group + 1, tmp->stat.gid);
-	else
-		ft_printf("%*s %*s", tmp->stat.ind.user + 1, tmp->stat.user_name, tmp->stat.ind.group + 1, tmp->stat.group_name);
-	ft_printf("%*d %s %s", tmp->stat.ind.size + 2, tmp->stat.size, tmp->date, tmp->name);
-	if (tmp->rights[0] == 'l')
-	{
-		temp = ft_strjoin(tmp->path, tmp->name);
-		buff = ft_memalloc(4096);
-		buff[4096] ='\0';
-		readlink(temp, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
-		free(buff);
-		free(temp);
-	}
-	else
-		ft_printf("\n");
-}
+// 	tmp->stat.ind = tmp->addr->stat.ind;
+// 	ft_printf("%s %*d", tmp->rights, tmp->stat.ind.link, tmp->stat.link_num);
+// 	if (tmp->flag & FG_N)
+// 		ft_printf("%*d %*d", tmp->stat.ind.user + 1, tmp->stat.uid, tmp->stat.ind.group + 1, tmp->stat.gid);
+// 	else
+// 		ft_printf("%*s %*s", tmp->stat.ind.user + 1, tmp->stat.user_name, tmp->stat.ind.group + 1, tmp->stat.group_name);
+// 	ft_printf("%*d %s %s", tmp->stat.ind.size + 2, tmp->stat.size, tmp->date, tmp->name);
+// 	if (tmp->rights[0] == 'l')
+// 	{
+// 		temp = ft_strjoin(tmp->path, tmp->name);
+// 		buff = ft_memalloc(4096);
+// 		buff[4096] ='\0';
+// 		readlink(temp, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
+// 		free(buff);
+// 		free(temp);
+// 	}
+// 	else
+// 		ft_printf("\n");
+// }
 
-void		output(t_file *file)
-{
-	t_file *tmp;
+// void		output(t_file *file)
+// {
+// 	t_file *tmp;
 
-	while (file)
-	{
-		if (file->name)
-		{
-			if (file->flag & FG_M && file->next)
-				ft_printf("%s, ", file->name);
-			else if ((file->flag & FG_ONE) || (file->flag & FG_M))
-				ft_printf("%s\n", file->name);
-			else if ((file->flag & FG_L) || (file->flag & FG_N))
-				output_long(file);
-		}
-		tmp = file;
-		file = file->next;
-		// destroy_file(&tmp);
-	}
-}
+// 	while (file)
+// 	{
+// 		if (file->name)
+// 		{
+// 			if (file->flag & FG_M && file->next)
+// 				ft_printf("%s, ", file->name);
+// 			else if ((file->flag & FG_ONE) || (file->flag & FG_M))
+// 				ft_printf("%s\n", file->name);
+// 			else if ((file->flag & FG_L) || (file->flag & FG_N))
+// 				output_long(file);
+// 		}
+// 		tmp = file;
+// 		file = file->next;
+// 		// destroy_file(&tmp);
+// 	}
+// }
 
-void		get_date(t_file *file, time_t *time_s)
+void		get_date(t_file *file)
 {
 	uintmax_t	tmp;
 	time_t		current_time;
 	time_t		difference;
 	char		*time_str;
 
-	time_str = ctime(time_s);
+	time_str = ctime(&file->st.st_mtime);
 	time(&current_time);
 	ft_memcpy((void *)file->date, time_str + 4, 12);
 	file->date[12] = '\0';
-	if (current_time > *time_s)
-		difference = current_time - *time_s;
+	if (current_time > file->st.st_mtime)
+		difference = current_time - file->st.st_mtime;
 	else
-		difference = *time_s - current_time;
+		difference = file->st.st_mtime - current_time;
 	if (difference > 15778463)
 	{
 		file->date[7] = ' ';
 		ft_memcpy((void *)(file->date + 8), time_str + 20, 4);
 	}
-	if ((tmp = ft_strlen(time_str)) > file->stat.ind.date)
-		file->stat.ind.date = tmp;
+	if ((tmp = ft_strlen(time_str)) > file->addr->ind.date)
+		file->addr->ind.date = tmp;
 }
 
 void		get_ug_indent(t_file *file)
@@ -746,17 +586,17 @@ void		get_ug_indent(t_file *file)
 
 	if (file->flag & FG_N)
 	{
-		if ((tmp = ft_count_digits_base(file->stat.uid, 10)) > file->stat.ind.user)
-			file->stat.ind.user = tmp;
-		if ((tmp = ft_count_digits_base(file->stat.gid, 10)) > file->stat.ind.group)
-			file->stat.ind.group = tmp;
+		if ((tmp = ft_count_digits_base(file->st.st_uid, 10)) > file->addr->ind.user)
+			file->addr->ind.user = tmp;
+		if ((tmp = ft_count_digits_base(file->st.st_gid, 10)) > file->addr->ind.group)
+			file->addr->ind.group = tmp;
 	}
 	else
 	{
-		if ((tmp = ft_strlen(file->stat.user_name)) > file->stat.ind.user)
-			file->stat.ind.user = tmp;
-		if ((tmp = ft_strlen(file->stat.group_name)) > file->stat.ind.group)
-			file->stat.ind.group = tmp;
+		if ((tmp = ft_strlen(file->user)) > file->addr->ind.user)
+			file->addr->ind.user = tmp;
+		if ((tmp = ft_strlen(file->group)) > file->addr->ind.group)
+			file->addr->ind.group = tmp;
 	}
 }
 
@@ -765,141 +605,261 @@ void		get_ug_name(t_file *file)
 	struct passwd	*pwuser;
 	struct group	*grpnam;
 
-	if (!(pwuser = getpwuid(file->stat.uid)))
+	if (!(pwuser = getpwuid(file->st.st_uid)))
 	{
 		ft_printf("There's an error after trying to get user\n");
 		exit(errno);
 	}
-	if (!(grpnam = getgrgid(file->stat.gid)))
+	if (!(grpnam = getgrgid(file->st.st_gid)))
 	{
 		ft_printf("There's an error after trying to get group\n");
 		exit(errno);
 	}
-	file->stat.user_name = ft_strdup(pwuser->pw_name);
-	file->stat.group_name = ft_strdup(grpnam->gr_name);
+	if (file->user)
+		free(file->user);
+	file->user = ft_strdup(pwuser->pw_name);
+	if (file->group)
+		free(file->group);
+	file->group = ft_strdup(grpnam->gr_name);
 	get_ug_indent(file);
 }
 
-void		get_rights(t_file *file, mode_t mode)
+void		get_rights(t_file *file)
 {
-	if (S_ISBLK(mode) || S_ISCHR(mode))
-		file->rights[0] = S_ISBLK(mode) ? 'b' : 'c';
-	else if (S_ISDIR(mode) || S_ISFIFO(mode))
-		file->rights[0] = S_ISDIR(mode) ? 'd' : 'p';
-	else if (S_ISLNK(mode) || S_ISREG(mode))
-		file->rights[0] = S_ISLNK(mode) ? 'l' : '-';
+	if (S_ISBLK(file->st.st_mode) || S_ISCHR(file->st.st_mode))
+		file->rights[0] = S_ISBLK(file->st.st_mode) ? 'b' : 'c';
+	else if (S_ISDIR(file->st.st_mode) || S_ISFIFO(file->st.st_mode))
+		file->rights[0] = S_ISDIR(file->st.st_mode) ? 'd' : 'p';
+	else if (S_ISLNK(file->st.st_mode) || S_ISREG(file->st.st_mode))
+		file->rights[0] = S_ISLNK(file->st.st_mode) ? 'l' : '-';
 	else
-		file->rights[0] = S_ISSOCK(mode)? 's' : file->rights[0];
-	file->rights[1] = mode & S_IRUSR ? 'r' : '-';
-	file->rights[2] = mode & S_IWUSR ? 'w' : '-';
-	if (mode & S_ISUID)
-		file->rights[3] = mode & S_IXUSR ? 's' : 'S';
+		file->rights[0] = S_ISSOCK(file->st.st_mode)? 's' : file->rights[0];
+	file->rights[1] = file->st.st_mode & S_IRUSR ? 'r' : '-';
+	file->rights[2] = file->st.st_mode & S_IWUSR ? 'w' : '-';
+	if (file->st.st_mode & S_ISUID)
+		file->rights[3] = file->st.st_mode & S_IXUSR ? 's' : 'S';
 	else
-		file->rights[3] = mode & S_IXUSR ? 'x' : '-';
-	file->rights[4] = mode & S_IRGRP ? 'r' : '-';
-	file->rights[5] = mode & S_IWGRP ? 'w' : '-';
-	if (mode & S_ISGID)
-		file->rights[6] = mode & S_IXGRP ? 's' : 'S';
+		file->rights[3] = file->st.st_mode & S_IXUSR ? 'x' : '-';
+	file->rights[4] = file->st.st_mode & S_IRGRP ? 'r' : '-';
+	file->rights[5] = file->st.st_mode & S_IWGRP ? 'w' : '-';
+	if (file->st.st_mode & S_ISGID)
+		file->rights[6] = file->st.st_mode & S_IXGRP ? 's' : 'S';
 	else
-		file->rights[6] = mode & S_IXGRP ? 'x' : '-';
-	file->rights[7] = mode & S_IROTH ? 'r' : '-';
-	file->rights[8] = mode & S_IWOTH ? 'r' : '-';
-	if (mode & S_ISVTX)
-		file->rights[9] = mode & S_IXOTH ? 't' : 'T';
+		file->rights[6] = file->st.st_mode & S_IXGRP ? 'x' : '-';
+	file->rights[7] = file->st.st_mode & S_IROTH ? 'r' : '-';
+	file->rights[8] = file->st.st_mode & S_IWOTH ? 'w' : '-';
+	if (file->st.st_mode & S_ISVTX)
+		file->rights[9] = file->st.st_mode & S_IXOTH ? 't' : 'T';
 	else
-		file->rights[9] = mode & S_IXOTH ? 'x' : '-';
+		file->rights[9] = file->st.st_mode & S_IXOTH ? 'x' : '-';
 }
 
-void		get_stats(t_file *file)
+int			get_stats(t_file *file)
 {
-	char		*temp;
 	int			tmp;
-	struct stat	ds;
 
-	temp = ft_strjoin(file->path, file->name);
-	if (lstat(temp, &ds) < 0)
-		if (stat(temp, &ds) < 0)
-			error(file->name, strerror(errno));
-	file->stat.ind = file->addr->stat.ind;
-	get_rights(file, ds.st_mode);
+	// tmp = 0;
+	get_rights(file);
 	file->rights[10] = ' ';
 	file->rights[11] = '\0';
-	file->stat.link_num = ds.st_nlink;
-	if ((tmp = ft_count_digits_base(ds.st_nlink, 10)) > file->stat.ind.link)
-		file->stat.ind.link = tmp;
-	file->stat.uid = ds.st_uid;
-	file->stat.gid = ds.st_gid;
+	if ((tmp = ft_count_digits_base(file->st.st_nlink, 10)) > file->addr->ind.link)
+		file->addr->ind.link = tmp;
 	get_ug_name(file);
-	file->stat.size = ds.st_size;
-	if ((tmp = ft_count_digits_base(ds.st_size, 10)) > file->stat.ind.size)
-		file->stat.ind.size = tmp;
-	get_date(file, &ds.st_mtime);
-	file->stat.ind.total += ds.st_blocks;
-	file->addr->stat.ind = file->stat.ind;
-	free(temp);
+	// if ()
+	// if ((tmp = ft_strlen(file->size)) > file->addr->ind.size)
+	if ((tmp = ft_count_digits_base(file->st.st_size, 10)) > file->addr->ind.size)
+		file->addr->ind.size = tmp;
+	get_date(file);
+	file->addr->ind.total += file->st.st_blocks;
+	file->ind = file->addr->ind;
+	return (1);
 }
 
-void		open_dir(t_file *dir)
+void		output_long(t_file *file)
 {
-	struct dirent	*dir_s;
-	t_file			*new_dir;
-	t_file			*tmp;
+	char	*buff;
+	char	*temp;
 
-
-		new_dir = new_file();
-		new_dir->flag = dir->flag;
-		if (dir->flag & WR_PTH)
-			ft_printf("%s:\n", dir->path ? dir->path : dir->name);
-		if (dir->name[0] != '.' && dir->name[1] != '\0')
-			new_dir->path = make_new_path(dir);
-		while ((dir_s = readdir(dir->dir)))
-		{
-			if ((dir->flag & FG_A) || dir_s->d_name[0] != '.')
-			{
-				add_file(&new_dir, dir_s->d_name);
-				get_stats(new_dir);
-			}
-		}
-		tmp = dir;
-		dir = dir->next;
-		// destroy_file(&tmp);
-		new_dir = new_dir->addr;
-		sort(&new_dir);
-		if ((new_dir->flag & FG_L) || (new_dir->flag & FG_N))
-			ft_printf("total %d\n", new_dir->stat.ind.total);
-		while (new_dir && new_dir->name)
-		{
-			if ((new_dir->flag & FG_L) || (new_dir->flag & FG_N))
-				output_long(new_dir);
-			if (new_dir->flag & FG_ONE)
-				ft_printf("%s\n", new_dir->name);
-			tmp = new_dir;
-			new_dir = new_dir->next;
-			// destroy_file(&tmp);
-		}
-		if (dir)
-			write(1, "\n", 1);
-}
-
-void		find_errors(t_file **file, t_file **dir, char *str)
-{
-	DIR		*direct;
-
-	if ((!(direct = opendir(str)) && errno == ENOENT) ||  (str[ft_strlen(str) - 1] == '/' && errno == ENOTDIR))
-		error(str, strerror(errno));
-	else if (errno == ENOTDIR)
+	ft_printf("%s %*d ", file->rights, file->ind.link, file->st.st_nlink);
+	if (file->flag & FG_N)
+		ft_printf("%-*d  %-*d  ", file->ind.user, file->st.st_uid, file->ind.group, file->st.st_gid);
+	else
+		ft_printf("%-*s  %-*s  ", file->ind.user, file->user, file->ind.group, file->group);
+	if (file->rights[0] != 'b' && file->rights[0] != 'c')
+		ft_printf("%*d %s %s", file->ind.size, file->st.st_size, file->date, file->name);
+	else
+		ft_printf("%3d, %3d %s %s", major(file->st.st_rdev), minor(file->st.st_rdev), file->date, file->name);
+	if (file->rights[0] == 'l')
 	{
-		add_file(file, str);
-		get_stats(*file);
+		buff = ft_memalloc(4096);
+		buff[4096] ='\0';
+		if (file->path)
+			readlink(file->path, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
+		else
+			readlink(file->name, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
+		free(buff);
 	}
 	else
+		ft_printf("\n");
+}
+
+void	output_file(t_file *file)
+{
+	if (file->flag & FG_M)
+		ft_printf("%s, ", file->name);
+	else if (file->flag & FG_L)
+		output_long(file);
+	else
+	// else if (file->flag & FG_ONE)
+		ft_putendl(file->name);
+	// else
+	// 	ft_printf("No realisation yet\n");
+	// 	output_columns(file);	
+}
+
+void		get_info(t_file **file, char *path, char *str)
+{
+	add_file(file, str);
+	ft_strdel(&(*file)->path);
+	(*file)->path = make_new_path(path, str);
+	lstat((*file)->path, &(*file)->st) < 0 ? stat((*file)->path, &(*file)->st) : 0;
+	get_stats(*file);
+}
+
+// void		open_dir(t_file *dir)
+// {
+// 	struct dirent	*dir_s;
+// 	t_file			*new_dir;
+// 	t_file			*tmp;
+
+
+// 		new_dir = new_file();
+// 		new_dir->flag = dir->flag;
+// 		if (dir->flag & WR_PTH)
+// 			ft_printf("%s:\n", dir->path ? dir->path : dir->name);
+// 		if (dir->name[0] != '.' && dir->name[1] != '\0')
+// 			new_dir->path = make_new_path(dir);
+// 		while ((dir_s = readdir(dir->dir)))
+// 		{
+// 			if ((dir->flag & FG_A) || dir_s->d_name[0] != '.')
+// 			{
+// 				add_file(&new_dir, dir_s->d_name);
+// 				get_stats(new_dir);
+// 			}
+// 		}
+// 		tmp = dir;
+// 		dir = dir->next;
+// 		closedir(tmp->dir);
+// 		// destroy_file(&tmp);
+// 		new_dir = new_dir->addr;
+// 		sort(&new_dir);
+// 		if ((new_dir->flag & FG_L) || (new_dir->flag & FG_N))
+// 			ft_printf("total %d\n", new_dir->stat.ind.total);
+// 		while (new_dir && new_dir->name)
+// 		{
+// 			if ((new_dir->flag & FG_L) || (new_dir->flag & FG_N))
+// 				output_long(new_dir);
+// 			if (new_dir->flag & FG_ONE)
+// 				ft_printf("%s\n", new_dir->name);
+// 			tmp = new_dir;
+// 			new_dir = new_dir->next;
+// 			destroy_file(&tmp);
+// 		}
+// 		if (dir)
+// 			write(1, "\n", 1);
+// }
+
+void		open_dir(t_file *directory)
+{
+	DIR				*dir;
+	struct dirent	*ds;
+	t_file			*file;
+	t_file			*tmp;
+	t_file			*iter;
+	char			*helper;
+
+	helper = directory->path ? directory->path : directory->name;
+	file = new_file();
+	file->flag = directory->flag;
+	if (directory->flag & WR_PTH)
+		ft_printf("\n%s:\n", helper);
+	file->flag |= WR_PTH;
+	if (!(dir = opendir(helper)))
 	{
-		add_file(dir, str);
-		get_stats(*dir);
-		if ((*dir)->name)
-			(*dir)->dir = direct;
+		error(directory->name);
+		return ;
 	}
-	errno = 0;
+	while ((ds = readdir(dir)))
+	{
+		if (!(directory->flag & FG_A) && ds->d_name[0] == '.')
+			continue ;
+		get_info(&file, helper, ds->d_name);
+	}
+	if (!file->name)
+		return ;
+	file = file->addr;
+	sort(&file);
+	file->flag & FG_L ? ft_printf("total %d\n", file->ind.total) : 0;
+	iter = file;
+	while (iter)
+	{
+		iter->ind = iter->addr->ind;
+		output_file(iter);
+		iter = iter->next;
+	}
+	while (file)
+	{
+		S_ISDIR(file->st.st_mode) && (file->flag & FG_RECUR) ? open_dir(file) : 0;
+		tmp = file;
+		file = file->next;
+		destroy_file(&tmp);
+	}
+	closedir(dir);
+}
+
+t_file	*write_files(t_file *file)
+{
+	t_file *iter;
+
+	iter = file;
+	while (iter && iter->name)
+	{
+		if (!S_ISDIR(iter->st.st_mode))
+		{
+			file->ind = file->addr->ind;
+			output_file(iter);
+		}
+		iter = iter->next;
+	}
+	file->flag & FG_M ? ft_putendl("") : 0;
+	return (file->addr);
+}
+
+int		is_option(char c, u_int32_t *flag)
+{
+	if (c == 'a' || c == 'f')
+		(*flag) |= c == 'f' ? FG_A | FG_F : FG_A;
+	else if (c == '1' || c == 'r')
+		(*flag) |= c == 'r' ? FG_R : ((((*flag) | FG_ONE)
+			& ~FG_C) & ~FG_L) & ~FG_M;
+	else if (c == 'l' || c == 'n')
+		(*flag) |= c == 'l' ? (((((*flag) | FG_L) &
+			~FG_C) & ~FG_ONE) & ~FG_M) | FG_F : FG_L | FG_N;
+	else if (c == 'g' || c == 'G')
+		(*flag) |= c == 'g' ? FG_L | FG_G : FG_COLOR;
+	else if (c == 't' || c == 'u')
+		(*flag) |= c == 'u' ? FG_U : FG_T;
+	else if (c == 'R' || c == 'd')
+		(*flag) |= c == 'R' ? FG_RECUR : ~FG_RECUR | FG_D;
+	else if (c == 'm')
+		(*flag) |= ((((*flag) |FG_M) & ~FG_ONE) & ~FG_L) & ~FG_C;
+	else if (c == 'C' && !((*flag) & FG_M))
+		(*flag) |= (FG_C & ~FG_ONE) & ~FG_L;
+	else if (c == 'h')
+		(*flag) |= FG_H;
+	else
+		return (0);
+	return (1);
 }
 
 int		ft_parse_options(t_file *file, int argc, char **argv)
@@ -912,72 +872,47 @@ int		ft_parse_options(t_file *file, int argc, char **argv)
 	{
 		j = 0;
 		while (argv[i][++j])
-		{
-			if (argv[i][j] == 'a' || argv[i][j] == 'f')
-				file->flag |= argv[i][j] == 'f' ? FG_A | FG_F : FG_F;
-			else if (argv[i][j] == '1' || argv[i][j] == 'r')
-				file->flag |= argv[i][j] == 'r' ? FG_R : (((file->flag | FG_ONE)
-					& ~FG_C) & ~FG_L) & ~FG_M;
-			else if (argv[i][j] == 'l' || argv[i][j] == 'n')
-				file->flag |= argv[i][j] == 'l' ? ((((file->flag | FG_L) &
-					~FG_C) & ~FG_ONE) & ~FG_M) | FG_F : FG_L | FG_N;
-			else if (argv[i][j] == 'g' || argv[i][j] == 'G')
-				file->flag |= argv[i][j] == 'g' ? FG_L | FG_G : FG_COLOR;
-			else if (argv[i][j] == 't' || argv[i][j] == 'u')
-				file->flag |= argv[i][j] == 'u' ? FG_U : FG_T;
-			else if (argv[i][j] == 'R' || argv[i][j] == 'd')
-				file->flag |= argv[i][j] == 'R' ? FG_RECUR : ~FG_RECUR | FG_D;
-			else if (argv[i][j] == 'm')
-				file->flag |= ((FG_M & ~FG_ONE) & ~FG_L) & ~FG_C;
-			else if (argv[i][j] == 'C' && !(file->flag & FG_M))
-				file->flag |= (FG_C & ~FG_ONE) & ~FG_L;
-			else if (argv[i][j] == 'h')
-				file->flag |= FG_H;
-			else if (argv[i][j] == '-' && !argv[i][j + 1])
-				return (i + 1);
-			else
-				usage(argv[i][j]);
-		}
+			if (!is_option(argv[i][j], &file->flag))
+			{
+				if (argv[i][j] == '-' && !argv[i][j + 1])
+				{
+					ft_quicksort_chars(argv, i, argc - 1);
+					return (i);
+				}
+				else
+					usage(argv[i][j]);
+			}
 	}
-	return (i);
+	ft_quicksort_chars(argv, i, argc - 1);
+	return (i - 1);
 }
 
 int		main(int argc, char **argv)
 {
+	int			index;
 	int			i;
+	struct stat	ds;
 	t_file		*file;
-	t_file		*dir;
 
 	file = new_file();
-	dir = new_file();
-	i = ft_parse_options(dir, argc, argv);
-	ft_quicksort_chars(argv, i, argc - 1);
-	if (argc - i == 0)
+	i = ft_parse_options(file, argc, argv);
+	if (argc == i + 1)
+		stat(".", &file->st) == 0 ? add_file(&file, ".") : error(".");
+	(argc - i > 2)? file->flag |= WR_PTH : 0;
+	while (++i < argc)
 	{
-		find_errors(&file, &dir, ".");
-		open_dir(dir->addr);
+		if ((index = lstat(argv[i], &ds)) < 0)
+			(index = stat(argv[i], &ds)) < 0 ? error(argv[i]) : 0;
+		index == 0 ? add_file(&file, argv[i]) && ft_memcpy(&file->st, &ds,
+			sizeof(struct stat)) && get_stats(file) : 0;
 	}
-	argc - i > 1 ? dir->flag |= WR_PTH : 0;
-	file->flag = dir->flag;
-	if (argc - i > 0)
+	file = write_files(file->addr);
+	while (file->next)
 	{
-		while (i < argc)
-		{
-			find_errors(&file, &dir, argv[i]);
-			i++;
-		}
-		if (file->name)
-		{
-			output(file->addr);
-			dir->name ? write(1, "\n", 1): 0;
-		}
-		while (dir && dir->dir)
-		{
-			open_dir(dir->addr);
-			dir = dir->next;
-		}
+		S_ISDIR(file->st.st_mode) ? open_dir(file) : 0;
+		file = file->next;
 	}
+	S_ISDIR(file->st.st_mode) ? open_dir(file) : 0;
 	// system("leaks ft_ls");
-	// output(file ? file->addr : NULL, dir ? dir->addr : NULL, error ? error->addr : NULL);
 	return (0);
 }

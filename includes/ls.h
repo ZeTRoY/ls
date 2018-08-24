@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/22 17:19:35 by aroi             ###   ########.fr       */
+/*   Updated: 2018/08/24 15:51:43 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <dirent.h>
 # include <errno.h>
 # include <sys/stat.h> //for stat and lstat
+# include <sys/types.h>
 # include <pwd.h>
 # include <grp.h>
 # include <time.h>
@@ -48,30 +49,21 @@ typedef struct		s_indent
 	u_int16_t		date;
 }					t_indent;
 
-typedef struct		s_info
-{
-	int				link_num;
-	int				uid;
-	int				gid;
-	char			*user_name;
-	char			*group_name;
-	uintmax_t		size;
-	time_t			*time;
-	t_indent		ind;
-}					t_info;
-
 typedef struct		s_file
 {
 	u_int32_t		flag;
-	int				err;
 	char			rights[12];
 	char			date[13];
+	char			*str;
 	char			*name;
 	char			*path;
+	char			*user;
+	char			*group;
+	// char			*size;
 	struct s_file	*addr;
 	struct s_file	*next;
-	DIR				*dir;
-	t_info			stat;
+	struct stat		st;
+	t_indent		ind;
 }					t_file;
 
 #endif
