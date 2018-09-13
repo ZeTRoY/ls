@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/24 15:51:43 by aroi             ###   ########.fr       */
+/*   Updated: 2018/09/13 18:42:40 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@
 # define FG_N		0x2000
 # define FG_H		0x4000
 # define WR_PTH		0x8000
+# define IS_FILE	0x10000
 
 typedef struct		s_indent
 {
@@ -53,7 +54,7 @@ typedef struct		s_file
 {
 	u_int32_t		flag;
 	char			rights[12];
-	char			date[13];
+	char			date[14];
 	char			*str;
 	char			*name;
 	char			*path;

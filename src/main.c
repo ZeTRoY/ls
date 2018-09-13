@@ -6,13 +6,13 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:28:36 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/24 16:53:51 by aroi             ###   ########.fr       */
+/*   Updated: 2018/09/13 19:20:25 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //
 //	What does "unknown" type of file mean?
-//	should errors output to standart or errorr output
+//	errors output - check
 //	error leaks
 //
 
@@ -41,11 +41,13 @@ void	error(char *str)
 	perror(str);
 }
 
-void	usage(char c) //should be illegal option here? is ./ft_ls ?
+void	usage(char c, char *str) //should be illegal option here? is ./ft_ls ? and error output
 {
-	ft_printf("ls: illegal option -- %c\n", c);
-	ft_printf("usage: ls [-Ralrt1] [file ...]\n");
-	system("leaks ft_ls");
+	write(2, "ls: ", 4);
+	ft_printf("illegal option -- %c\n", c);
+	ft_printf("usage: ls [-ABCFGHLOPRSTUWabcdefghiklmnopqrstuwx1] [file ...]\n");
+	// ft_printf("usage: ls [-Ralrt1] [file ...]\n");
+	// system("leaks ft_ls");
 	exit(1);
 }
 
@@ -72,7 +74,7 @@ void	kek(t_file **current, t_file **prev, t_file **end)
 	*current = tmp;
 }
 
-t_file	*partition(t_file *left, t_file **left1, t_file *right, t_file **right1)
+t_file	*t_partition(t_file *left, t_file **left1, t_file *right, t_file **right1)
 {
 	t_file	*pivot;
 	t_file	*prev;
@@ -85,7 +87,7 @@ t_file	*partition(t_file *left, t_file **left1, t_file *right, t_file **right1)
 	end = pivot;
 	while (current != pivot)
 	{
-		if (ft_strcmp(current->name, pivot->name) <= 0)
+		if (left->flag & FG_R ? current->st.st_mtime - pivot->st.st_mtime <= 0 : current->st.st_mtime - pivot->st.st_mtime >= 0)
 		{
 			if (*left1 == NULL)
 				*left1 = current;
@@ -101,7 +103,36 @@ t_file	*partition(t_file *left, t_file **left1, t_file *right, t_file **right1)
 	return (pivot);
 }
 
-t_file	*quicksort(t_file	*left, t_file *right)
+t_file	*not_t_partition(t_file *left, t_file **left1, t_file *right, t_file **right1)
+{
+	t_file	*pivot;
+	t_file	*prev;
+	t_file	*current;
+	t_file	*end;
+
+	pivot = right;
+	prev = NULL;
+	current = left;
+	end = pivot;
+	while (current != pivot)
+	{
+		if (left->flag & FG_R ? ft_strcmp(current->name, pivot->name) >= 0 : ft_strcmp(current->name, pivot->name) <= 0)
+		{
+			if (*left1 == NULL)
+				*left1 = current;
+			prev = current;
+			current = current->next;
+		}
+		else
+			kek(&current, &prev, &end);
+	}
+	if (*left1 == NULL)
+		*left1 = pivot;
+	*right1 = end;
+	return (pivot);
+}
+
+t_file	*quicksort(t_file *left, t_file *right, int flag)
 {
 	t_file	*pivot;
 	t_file	*left1;
@@ -112,27 +143,33 @@ t_file	*quicksort(t_file	*left, t_file *right)
 		return (left);
 	left1 = NULL;
 	right1 = NULL;
-	pivot = partition(left, &left1, right, &right1);
+	pivot = flag == FG_T ? t_partition(left, &left1, right, &right1)
+		: not_t_partition(left, &left1, right, &right1);
 	if (left1 != pivot)
 	{
 		tmp = left1;
 		while (tmp->next != pivot)
 			tmp = tmp->next;
 		tmp->next = NULL;
-		left1 = quicksort(left1, tmp);
+		left1 = quicksort(left1, tmp, flag);
 		tmp = end_of_list(left1);
 		tmp->next = pivot;
 	}
-	pivot->next = quicksort(pivot->next, right1);
+	pivot->next = quicksort(pivot->next, right1, flag);
 	return (left1);
 }
 
-void	sort(t_file **ls)
+void	sort(t_file **ls, int flag)
 {
-	// t_ls	*tmp;
+	t_file	*tmp;
 
-	// tmp = *ls;
-	*ls = quicksort(*ls, end_of_list(*ls));
+	*ls = quicksort(*ls, end_of_list(*ls), flag);
+	tmp = *ls;
+	while (tmp)
+	{
+		tmp->addr = *ls;
+		tmp = tmp->next;
+	}
 }
 
 // t_ls		*partition(t_ls *ls_left, t_ls *ls_right)
@@ -565,17 +602,15 @@ void		get_date(t_file *file)
 
 	time_str = ctime(&file->st.st_mtime);
 	time(&current_time);
+	file->date[13] = '\0';
 	ft_memcpy((void *)file->date, time_str + 4, 12);
-	file->date[12] = '\0';
 	if (current_time > file->st.st_mtime)
 		difference = current_time - file->st.st_mtime;
 	else
 		difference = file->st.st_mtime - current_time;
 	if (difference > 15778463)
-	{
-		file->date[7] = ' ';
-		ft_memcpy((void *)(file->date + 8), time_str + 20, 4);
-	}
+		ft_memcpy((void *)(file->date + 7), ft_strrchr(time_str, ' '), 6);
+	!ft_isdigit(file->date[12]) ? file->date[12] = '\0' : 0;
 	if ((tmp = ft_strlen(time_str)) > file->addr->ind.date)
 		file->addr->ind.date = tmp;
 }
@@ -665,8 +700,6 @@ int			get_stats(t_file *file)
 	if ((tmp = ft_count_digits_base(file->st.st_nlink, 10)) > file->addr->ind.link)
 		file->addr->ind.link = tmp;
 	get_ug_name(file);
-	// if ()
-	// if ((tmp = ft_strlen(file->size)) > file->addr->ind.size)
 	if ((tmp = ft_count_digits_base(file->st.st_size, 10)) > file->addr->ind.size)
 		file->addr->ind.size = tmp;
 	get_date(file);
@@ -780,13 +813,14 @@ void		open_dir(t_file *directory)
 
 	helper = directory->path ? directory->path : directory->name;
 	file = new_file();
+	directory->flag |= directory->flag & IS_FILE ? write(1, "\n", 1) & 0 : IS_FILE;
+	directory->flag & WR_PTH ? ft_printf("%s:\n", helper) : 0;//sadasd
+	directory->flag |= WR_PTH;
 	file->flag = directory->flag;
-	if (directory->flag & WR_PTH)
-		ft_printf("\n%s:\n", helper);
-	file->flag |= WR_PTH;
 	if (!(dir = opendir(helper)))
 	{
 		error(directory->name);
+		destroy_file(&file);
 		return ;
 	}
 	while ((ds = readdir(dir)))
@@ -795,10 +829,20 @@ void		open_dir(t_file *directory)
 			continue ;
 		get_info(&file, helper, ds->d_name);
 	}
-	if (!file->name)
-		return ;
 	file = file->addr;
-	sort(&file);
+	if (!file->name)
+	{
+		while (file)
+		{
+			tmp = file;
+			file = file->next;
+			destroy_file(&tmp);
+		}
+		closedir(dir);
+		return ;
+	}
+	sort(&file, 0);
+	file->flag & FG_T ? sort(&file, FG_T) : 0;
 	file->flag & FG_L ? ft_printf("total %d\n", file->ind.total) : 0;
 	iter = file;
 	while (iter)
@@ -809,7 +853,8 @@ void		open_dir(t_file *directory)
 	}
 	while (file)
 	{
-		S_ISDIR(file->st.st_mode) && (file->flag & FG_RECUR) ? open_dir(file) : 0;
+		if ((file->name[0] != '.' || file->name[1]) && (file->name[0] != '.' || file->name[1] != '.'))
+			S_ISDIR(file->st.st_mode) && (file->flag & FG_RECUR) ? open_dir(file) : 0;
 		tmp = file;
 		file = file->next;
 		destroy_file(&tmp);
@@ -817,21 +862,22 @@ void		open_dir(t_file *directory)
 	closedir(dir);
 }
 
-t_file	*write_files(t_file *file)
+t_file		*write_files(t_file *file)
 {
-	t_file *iter;
+	t_file	*iter;
 
 	iter = file;
 	while (iter && iter->name)
 	{
 		if (!S_ISDIR(iter->st.st_mode))
 		{
+			file->flag |= IS_FILE;
 			file->ind = file->addr->ind;
 			output_file(iter);
 		}
 		iter = iter->next;
 	}
-	file->flag & FG_M ? ft_putendl("") : 0;
+	(file->flag & FG_M)? write(1, "\n", 1) : 0;
 	return (file->addr);
 }
 
@@ -871,16 +917,21 @@ int		ft_parse_options(t_file *file, int argc, char **argv)
 	while (++i < argc && argv[i][0] == '-')
 	{
 		j = 0;
+		if (argv[i][1] == 0)
+		{
+			ft_quicksort_chars(argv, i, argc - 1);
+			return (i - 1);
+		}
 		while (argv[i][++j])
 			if (!is_option(argv[i][j], &file->flag))
 			{
 				if (argv[i][j] == '-' && !argv[i][j + 1])
 				{
-					ft_quicksort_chars(argv, i, argc - 1);
+					ft_quicksort_chars(argv, i + 1, argc - 1);
 					return (i);
 				}
 				else
-					usage(argv[i][j]);
+					usage(argv[i][j], argv[0]);
 			}
 	}
 	ft_quicksort_chars(argv, i, argc - 1);
@@ -901,18 +952,34 @@ int		main(int argc, char **argv)
 	(argc - i > 2)? file->flag |= WR_PTH : 0;
 	while (++i < argc)
 	{
-		if ((index = lstat(argv[i], &ds)) < 0)
-			(index = stat(argv[i], &ds)) < 0 ? error(argv[i]) : 0;
+		// if (file->flag & FG_L)
+		// {
+
+			if ((index = stat(argv[i], &ds)) < 0) 
+				(index = lstat(argv[i], &ds)) < 0 ? error(argv[i]) : 0;
+
+		// }
+		// else
+		// {
+			// (index = lstat(argv[i], &ds)) < 0 ? error(argv[i]) : 0;
+			// 	ft_printf("soska\n");
+		// }
+
 		index == 0 ? add_file(&file, argv[i]) && ft_memcpy(&file->st, &ds,
 			sizeof(struct stat)) && get_stats(file) : 0;
 	}
+	sort(&file->addr, 0);
+	file->flag & FG_T ? sort(&file->addr, FG_T) : 0;
 	file = write_files(file->addr);
 	while (file->next)
 	{
+		// ft_printf("name: %s\n", file->name);
 		S_ISDIR(file->st.st_mode) ? open_dir(file) : 0;
 		file = file->next;
+		file->flag |= IS_FILE;
 	}
 	S_ISDIR(file->st.st_mode) ? open_dir(file) : 0;
+
 	// system("leaks ft_ls");
 	return (0);
 }

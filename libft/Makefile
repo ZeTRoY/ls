@@ -6,7 +6,7 @@
 #    By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/05/14 17:42:00 by aroi              #+#    #+#              #
-#    Updated: 2018/08/21 08:09:44 by aroi             ###   ########.fr        #
+#    Updated: 2018/08/25 14:49:23 by aroi             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -128,7 +128,7 @@ all: $(NAME)
 
 obj/%.o: src/%.c
 	@echo "\033[33mPunch in face!\033[0m"
-	@$(CC) $(CFLAGS) -o $@ -c $^ $(HEADER)
+	@$(CC) $(CFLAGS) -O3 -o $@ -c $^ $(HEADER)
 
 $(NAME): $(OBJ)
 	@echo "\033[32mOMG! SO MANY HITS! What is it performing!"
