@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:28:36 by aroi              #+#    #+#             */
-/*   Updated: 2018/09/13 19:20:25 by aroi             ###   ########.fr       */
+/*   Updated: 2018/09/15 17:59:55 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,21 @@
 void	error(char *str)
 {
 	write(2, "ls: ", 4);
-	perror(str);
+	if (!str[0])
+	{
+		write(2, ": ", 2);
+		perror("");
+	}
+	else
+		perror(str);
 }
 
 void	usage(char c, char *str) //should be illegal option here? is ./ft_ls ? and error output
 {
-	write(2, "ls: ", 4);
-	ft_printf("illegal option -- %c\n", c);
-	ft_printf("usage: ls [-ABCFGHLOPRSTUWabcdefghiklmnopqrstuwx1] [file ...]\n");
-	// ft_printf("usage: ls [-Ralrt1] [file ...]\n");
+	ft_putstr_fd("ls: ", 2);
+	ft_putstr_fd("illegal option -- ", 2);
+	ft_putchar_fd(c, 2);
+	ft_putstr_fd("\nusage: ls [-Ralrt1] [file ...]\n", 2);
 	// system("leaks ft_ls");
 	exit(1);
 }
@@ -165,6 +171,7 @@ void	sort(t_file **ls, int flag)
 
 	*ls = quicksort(*ls, end_of_list(*ls), flag);
 	tmp = *ls;
+	tmp->ind = tmp->addr->ind;
 	while (tmp)
 	{
 		tmp->addr = *ls;
@@ -241,6 +248,7 @@ t_file		*new_file()
 	file->ind.user = 1;
 	file->ind.size = 1;
 	file->ind.total = 0;
+	file->acl = NULL;
 	return (file);
 }
 
@@ -593,6 +601,25 @@ void		output(t_file *file, t_file *dir)
 // 	}
 // }
 
+void		write_acl(t_file *file)
+{
+	char	**tmp;
+	char	*text;
+	
+	text = acl_to_text(file->acl, NULL);
+	tmp = ft_strsplit(ft_strchr(text, '\n') + 1, ':');
+	write(1, " 0: ", 4);
+	write(1, tmp[0], ft_strlen(tmp[0]));
+	write(1, ":", 1);
+	write(1, tmp[2], ft_strlen(tmp[2]));
+	write(1, " ", 1);
+	write(1, tmp[4], ft_strlen(tmp[4]));
+	write(1, " ", 1);
+	write(1, tmp[5], ft_strlen(tmp[5]));
+	free(text);
+	ft_freearr((void **)tmp);
+}
+
 void		get_date(t_file *file)
 {
 	uintmax_t	tmp;
@@ -692,10 +719,16 @@ void		get_rights(t_file *file)
 int			get_stats(t_file *file)
 {
 	int			tmp;
+	char		*path;
 
-	// tmp = 0;
 	get_rights(file);
-	file->rights[10] = ' ';
+	path = file->path ? file->path : file->name;
+	file->acl = acl_get_link_np(path, ACL_TYPE_EXTENDED);
+	file->rights[10] = file->acl ? '+' : ' ';
+	if (listxattr(path, NULL, 0, XATTR_NOFOLLOW) > 0)
+		file->rights[10] = '@';
+	else
+		errno = 0;
 	file->rights[11] = '\0';
 	if ((tmp = ft_count_digits_base(file->st.st_nlink, 10)) > file->addr->ind.link)
 		file->addr->ind.link = tmp;
@@ -713,13 +746,13 @@ void		output_long(t_file *file)
 	char	*buff;
 	char	*temp;
 
-	ft_printf("%s %*d ", file->rights, file->ind.link, file->st.st_nlink);
+	ft_printf("%s %*d ", file->rights, file->addr->ind.link, file->st.st_nlink);
 	if (file->flag & FG_N)
-		ft_printf("%-*d  %-*d  ", file->ind.user, file->st.st_uid, file->ind.group, file->st.st_gid);
+		ft_printf("%-*d  %-*d  ", file->addr->ind.user, file->st.st_uid, file->addr->ind.group, file->st.st_gid);
 	else
-		ft_printf("%-*s  %-*s  ", file->ind.user, file->user, file->ind.group, file->group);
+		ft_printf("%-*s  %-*s  ", file->addr->ind.user, file->user, file->addr->ind.group, file->group);
 	if (file->rights[0] != 'b' && file->rights[0] != 'c')
-		ft_printf("%*d %s %s", file->ind.size, file->st.st_size, file->date, file->name);
+		ft_printf("%*d %s %s", file->addr->ind.size, file->st.st_size, file->date, file->name);
 	else
 		ft_printf("%3d, %3d %s %s", major(file->st.st_rdev), minor(file->st.st_rdev), file->date, file->name);
 	if (file->rights[0] == 'l')
@@ -734,6 +767,7 @@ void		output_long(t_file *file)
 	}
 	else
 		ft_printf("\n");
+	file->acl && (file->flag & FG_ACL) ? write_acl(file) : 0;
 }
 
 void	output_file(t_file *file)
@@ -841,13 +875,15 @@ void		open_dir(t_file *directory)
 		closedir(dir);
 		return ;
 	}
-	sort(&file, 0);
-	file->flag & FG_T ? sort(&file, FG_T) : 0;
+	if (!(file->flag & FG_F))
+	{
+		sort(&file, 0);
+		file->flag & FG_T ? sort(&file, FG_T) : 0;
+	}
 	file->flag & FG_L ? ft_printf("total %d\n", file->ind.total) : 0;
 	iter = file;
 	while (iter)
 	{
-		iter->ind = iter->addr->ind;
 		output_file(iter);
 		iter = iter->next;
 	}
@@ -883,6 +919,7 @@ t_file		*write_files(t_file *file)
 
 int		is_option(char c, u_int32_t *flag)
 {
+	// *flag = 0;
 	if (c == 'a' || c == 'f')
 		(*flag) |= c == 'f' ? FG_A | FG_F : FG_A;
 	else if (c == '1' || c == 'r')
@@ -890,7 +927,7 @@ int		is_option(char c, u_int32_t *flag)
 			& ~FG_C) & ~FG_L) & ~FG_M;
 	else if (c == 'l' || c == 'n')
 		(*flag) |= c == 'l' ? (((((*flag) | FG_L) &
-			~FG_C) & ~FG_ONE) & ~FG_M) | FG_F : FG_L | FG_N;
+			~FG_C) & ~FG_ONE) & ~FG_M) : FG_L | FG_N;
 	else if (c == 'g' || c == 'G')
 		(*flag) |= c == 'g' ? FG_L | FG_G : FG_COLOR;
 	else if (c == 't' || c == 'u')
@@ -898,11 +935,13 @@ int		is_option(char c, u_int32_t *flag)
 	else if (c == 'R' || c == 'd')
 		(*flag) |= c == 'R' ? FG_RECUR : ~FG_RECUR | FG_D;
 	else if (c == 'm')
-		(*flag) |= ((((*flag) |FG_M) & ~FG_ONE) & ~FG_L) & ~FG_C;
+		(*flag) |= ((((*flag) | FG_M) & ~FG_ONE) & ~FG_L) & ~FG_C;
 	else if (c == 'C' && !((*flag) & FG_M))
 		(*flag) |= (FG_C & ~FG_ONE) & ~FG_L;
-	else if (c == 'h')
-		(*flag) |= FG_H;
+	else if (c == 'h' || c == 'e')
+		(*flag) |= c == 'h' ? FG_H : FG_ACL;
+	else if (c == '@')
+		(*flag) |= FG_EA;
 	else
 		return (0);
 	return (1);
@@ -919,7 +958,7 @@ int		ft_parse_options(t_file *file, int argc, char **argv)
 		j = 0;
 		if (argv[i][1] == 0)
 		{
-			ft_quicksort_chars(argv, i, argc - 1);
+			file->flag & FG_F ? 0 : ft_quicksort_chars(argv, i, argc - 1);
 			return (i - 1);
 		}
 		while (argv[i][++j])
@@ -927,14 +966,14 @@ int		ft_parse_options(t_file *file, int argc, char **argv)
 			{
 				if (argv[i][j] == '-' && !argv[i][j + 1])
 				{
-					ft_quicksort_chars(argv, i + 1, argc - 1);
+					file->flag & FG_F ? 0 : ft_quicksort_chars(argv, i + 1, argc - 1);
 					return (i);
 				}
 				else
 					usage(argv[i][j], argv[0]);
 			}
 	}
-	ft_quicksort_chars(argv, i, argc - 1);
+	file->flag & FG_F ? 0 : ft_quicksort_chars(argv, i, argc - 1);
 	return (i - 1);
 }
 
@@ -955,7 +994,7 @@ int		main(int argc, char **argv)
 		// if (file->flag & FG_L)
 		// {
 
-			if ((index = stat(argv[i], &ds)) < 0) 
+			if (file->flag & FG_L || (index = stat(argv[i], &ds)) < 0)
 				(index = lstat(argv[i], &ds)) < 0 ? error(argv[i]) : 0;
 
 		// }
@@ -968,8 +1007,11 @@ int		main(int argc, char **argv)
 		index == 0 ? add_file(&file, argv[i]) && ft_memcpy(&file->st, &ds,
 			sizeof(struct stat)) && get_stats(file) : 0;
 	}
-	sort(&file->addr, 0);
-	file->flag & FG_T ? sort(&file->addr, FG_T) : 0;
+	if (!(file->flag & FG_F))
+	{
+		sort(&file->addr, 0);
+		file->flag & FG_T ? sort(&file->addr, FG_T) : 0;
+	}
 	file = write_files(file->addr);
 	while (file->next)
 	{
