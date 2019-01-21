@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:53:44 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 11:52:51 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 18:33:44 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,5 @@ void	usage(char c, char *str) //should be illegal option here?
 	ft_putstr_fd("illegal option -- ", 2);
 	ft_putchar_fd(c, 2);
 	ft_putstr_fd("\nusage: ls [-@CGRaefglmnort1] [file ...]\n", 2);
-	// system("leaks ft_ls");
 	exit(1);
 }

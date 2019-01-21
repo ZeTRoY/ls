@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:55:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 13:03:25 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 18:48:32 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ void		output_long(t_file *file)
 		ft_printf("%*d ", file->addr->ind.size, file->st.st_size);
 	else if (minor(file->st.st_rdev) > 255 || minor(file->st.st_rdev) < 0)
 		ft_printf("%3d, 0x%08x ", major(file->st.st_rdev),
-			(u_int)minor(file->st.st_rdev));
+			(u_int)(minor(file->st.st_rdev) - 3));
 	else
 		ft_printf("%3d, %3d ", major(file->st.st_rdev),
 			minor(file->st.st_rdev));
