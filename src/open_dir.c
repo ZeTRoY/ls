@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:49:58 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 11:53:24 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 19:37:50 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,10 @@ static DIR	*create_file(t_file *directory, t_file **file)
 	char			*path;
 
 	path = directory->path ? directory->path : directory->name;
-	*file = new_file();
 	directory->flag |= directory->flag & IS_FILE ?
 		write(1, "\n", 1) & 0 : IS_FILE;
-	directory->flag & WR_PTH ? ft_printf("%s:\n", path) : 0;
+	directory->flag & WR_PTH ? write(1, path, ft_strlen(path)) &&
+		write(1, ":\n", 2) : 0;// ft_printf("%s:\n", path) : 0;
 	directory->flag |= WR_PTH;
 	(*file)->flag = directory->flag;
 	if (!(dir = opendir(path)))
@@ -64,6 +64,8 @@ static void	out_file(t_file *file)
 	t_file *iter;
 
 	iter = file;
+	file->flag & FG_L ? write(1, "total ", 6) &&
+		ft_printf("%d", file->ind.total) && write(1, "\n", 1) : 0;
 	if (file->flag & FG_C)
 		output_columns(file);
 	else
@@ -79,7 +81,8 @@ void		open_dir(t_file *directory)
 	DIR				*dir;
 	t_file			*tmp;
 	t_file			*file;
-
+	
+	*file = new_file();
 	if ((dir = create_file(directory, &file)) == NULL ||
 			isnt_proper_name(dir, &file))
 		return ;
@@ -88,7 +91,6 @@ void		open_dir(t_file *directory)
 		sort(&file, 0);
 		file->flag & FG_T ? sort(&file, FG_T) : 0;
 	}
-	file->flag & FG_L ? ft_printf("total %d\n", file->ind.total) : 0;
 	out_file(file);
 	while (file)
 	{

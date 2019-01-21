@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:55:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 18:48:32 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 19:45:19 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,12 @@ static void	ft_get_xattr(t_file *file)
 		while (*xattr)
 		{
 			size = getxattr(file->path, xattr, NULL, 0, 0, XATTR_NOFOLLOW);
-			ft_printf("\t%s\t%4d\n", xattr, size);
+			write(1, "\t", 1);
+			write(1, xattr, ft_strlen(xattr));
+			write(1, "\t", 1);
+			ft_printf("%4d", size);
+			write(1, "\n", 1);
+			// ft_printf("\t%s\t%4d\n", xattr, size);
 			xattr += ft_strlen(xattr) + 1;
 		}
 	}
@@ -86,14 +91,18 @@ static void	out_link(t_file *file)
 	{
 		buff = ft_memalloc(4096);
 		buff[4096] = '\0';
+		write(1, " -> ", 4);
 		if (file->path)
-			readlink(file->path, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
+			readlink(file->path, buff, 4095) > 0 ?
+				write(1, buff, ft_strlen(buff)) : 0;
 		else
-			readlink(file->name, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
+			readlink(file->name, buff, 4095) > 0 ?
+				write(1, buff, ft_strlen(buff)) : 0;
+			write(1, "\n", 1);
 		free(buff);
 	}
 	else
-		ft_printf("\n");
+		write(1, "\n", 1);
 	ft_get_xattr(file);
 }
 
@@ -118,10 +127,11 @@ void		output_long(t_file *file)
 	else
 		ft_printf("%3d, %3d ", major(file->st.st_rdev),
 			minor(file->st.st_rdev));
-	ft_printf("%s ", file->date);
+	// ft_printf("%s ", file->date);
+	write(1, file->date, ft_strlen(file->date));
+	write(1, " ", 1);
 	(file->flag & FG_COLOR) && ft_add_color(file) ?
 		write(1, file->name, ft_strlen(file->name)) && write(1, "\033[0m", 5) :
-		// ft_printf("%s\033[0m", file->name) :
 			write(1, file->name, ft_strlen(file->name));
 	out_link(file);
 }

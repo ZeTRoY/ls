@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:33:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/19 21:04:13 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 19:13:57 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,11 @@ void		get_ug_name(t_file *file)
 
 	if (!(pwuser = getpwuid(file->st.st_uid)))
 	{
-		ft_printf("There's an error after trying to get user\n");
+		//
 		exit(errno);
 	}
 	if (!(grpnam = getgrgid(file->st.st_gid)))
 	{
-		ft_printf("There's an error after trying to get group\n");
 		exit(errno);
 	}
 	if (file->user)

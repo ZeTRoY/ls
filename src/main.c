@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:29:28 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 13:09:23 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 19:12:05 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,5 @@ int			main(int argc, char **argv)
 	}
 	file = write_files(file->addr);
 	open_directories(&file);
-	// system("leaks ft_ls");
 	return (0);
 }

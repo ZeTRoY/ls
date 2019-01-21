@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:45:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/19 21:06:33 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 19:39:46 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,13 +53,14 @@ static void	print(int flag, t_file *iter, int size, int row)
 		if (flag & FG_COLOR)
 		{
 			ft_add_color(iter);
-			ft_printf("%s\033[0m", iter->name);
+			write(1, iter->name, ft_strlen(iter->name));
+			write(1, "\033[0m", 4);
 			while (j++ < size - ft_strlen(iter->name))
 				write(1, " ", 1);
 		}
 		else
 		{
-			ft_printf("%s", iter->name);
+			write(1, iter->name, ft_strlen(iter->name));
 			while (j < size - ft_strlen(iter->name) && (j += 8))
 				write(1, "\t", 1);
 		}

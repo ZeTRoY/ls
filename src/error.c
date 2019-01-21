@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:53:44 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 18:33:44 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 19:05:06 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,13 @@ void	error_handler(char *str)
 		perror(str);
 }
 
-void	usage(char c, char *str) //should be illegal option here?
-	//is ./ft_ls ? and error output
+void	usage(char c, char *str)
 {
-	ft_putstr_fd("ls: ", 2);
-	ft_putstr_fd("illegal option -- ", 2);
+	write(2, "ls: illegal option -- ", 22);
+	// ft_putstr_fd("ls: ", 2);
+	// ft_putstr_fd("illegal option -- ", 2);
 	ft_putchar_fd(c, 2);
-	ft_putstr_fd("\nusage: ls [-@CGRaefglmnort1] [file ...]\n", 2);
+	write(2, "\nusage: ls [-@CGRaefglmnort1] [file ...]\n", 41);
+	// ft_putstr_fd("\nusage: ls [-@CGRaefglmnort1] [file ...]\n", 2);
 	exit(1);
 }
