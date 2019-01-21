@@ -6,47 +6,58 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:57:29 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 11:39:13 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 13:03:16 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ls.h"
 
-static void	output_m(t_file *next, int x, char *name)
+static int	quick_write(char *name)
+{
+	write(1, name, ft_strlen(name));
+	return (1);
+}
+
+static void	output_m(t_file *file)
 {
 	struct winsize	win;
 
 	ioctl(0, TIOCGWINSZ, &win);
-	if (next == NULL)
+	if (file->next == NULL)
 	{
-		if (x + ft_strlen(name) + 1 > win.ws_col)
+		if (file->addr->x + ft_strlen(file->name) + 1 > win.ws_col)
 			ft_putchar('\n');
-		ft_printf("%s\n", name);
+		(file->flag & FG_COLOR) && ft_add_color(file) ?
+			quick_write(file->name) && write(1, "\033[0m\n", 5) :
+				quick_write(file->name) && write(1, "\n", 1);
 	}
 	else
 	{
-		if (x + ft_strlen(name) + 2 < win.ws_col)
-			x += ft_strlen(name) + 2;
+		if (file->addr->x + ft_strlen(file->name) + 2 < win.ws_col)
+			file->addr->x += ft_strlen(file->name) + 2;
 		else
 		{
-			x = ft_strlen(name) + 2;
+			file->addr->x = ft_strlen(file->name) + 2;
 			ft_putchar('\n');
 		}
-		ft_printf("%s, ", name);
+		(file->flag & FG_COLOR) && ft_add_color(file) ?
+			quick_write(file->name) && write(1, "\033[0m, ", 6):
+				quick_write(file->name) && write(1, ", ", 2);
 	}
 }
 
 void		output_file(t_file *file)
 {
-	if (file->flag & FG_COLOR)
-		ft_add_color(file);
 	if (file->flag & FG_M)
-		output_m(file->next, file->addr->x, file->name);
+		output_m(file);
 	else if (file->flag & FG_L)
+	{
+		ft_printf("%s %*d ", file->rights, file->addr->ind.link,
+			file->st.st_nlink);
 		output_long(file);
+	}
 	else if (file->flag & FG_ONE)
 		ft_putendl(file->name);
-	ft_putstr("\033[0m");
 }
 
 static char	*make_new_path(char *path, char *str)

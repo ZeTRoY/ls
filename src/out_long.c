@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:55:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/19 21:06:17 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 13:03:25 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,28 +78,27 @@ static void	ft_get_xattr(t_file *file)
 	file->acl && (file->flag & FG_ACL) ? write_acl(file) : 0;
 }
 
-static void	out_link(char c, char *path, char *name)
+static void	out_link(t_file *file)
 {
 	char	*buff;
 
-	if (c == 'l')
+	if (file->rights[0] == 'l')
 	{
 		buff = ft_memalloc(4096);
 		buff[4096] = '\0';
-		if (path)
-			readlink(path, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
+		if (file->path)
+			readlink(file->path, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
 		else
-			readlink(name, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
+			readlink(file->name, buff, 4095) > 0 ? ft_printf(" -> %s\n", buff) : 0;
 		free(buff);
 	}
 	else
 		ft_printf("\n");
+	ft_get_xattr(file);
 }
 
 void		output_long(t_file *file)
 {
-	ft_printf("%s %*d ", file->rights, file->addr->ind.link,
-		file->st.st_nlink);
 	if (file->flag & FG_N)
 		ft_printf("%-*d  %-*d  ", file->addr->ind.user, file->st.st_uid,
 			file->addr->ind.group, file->st.st_gid);
@@ -110,6 +109,7 @@ void		output_long(t_file *file)
 		if ((file->flag & FG_O) == 0)
 			ft_printf("%-*s  ", file->addr->ind.group, file->group);
 	}
+	(file->flag & FG_O) && (file->flag & FG_G) ? write(1, "  ", 2) : 0;
 	if (file->rights[0] != 'b' && file->rights[0] != 'c')
 		ft_printf("%*d ", file->addr->ind.size, file->st.st_size);
 	else if (minor(file->st.st_rdev) > 255 || minor(file->st.st_rdev) < 0)
@@ -119,8 +119,9 @@ void		output_long(t_file *file)
 		ft_printf("%3d, %3d ", major(file->st.st_rdev),
 			minor(file->st.st_rdev));
 	ft_printf("%s ", file->date);
-	file->flag & FG_COLOR ? ft_add_color(file) : 0;
-	ft_printf("%s\033[0m", file->name);
-	out_link(file->rights[0], file->path, file->name);
-	ft_get_xattr(file);
+	(file->flag & FG_COLOR) && ft_add_color(file) ?
+		write(1, file->name, ft_strlen(file->name)) && write(1, "\033[0m", 5) :
+		// ft_printf("%s\033[0m", file->name) :
+			write(1, file->name, ft_strlen(file->name));
+	out_link(file);
 }
