@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:57:29 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/19 21:00:48 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 11:39:13 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ void		output_file(t_file *file)
 		ft_putendl(file->name);
 	ft_putstr("\033[0m");
 }
-
 
 static char	*make_new_path(char *path, char *str)
 {

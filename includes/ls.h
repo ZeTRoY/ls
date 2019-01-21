@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/19 20:57:35 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 11:53:41 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,26 +71,26 @@ typedef struct		s_file
 	u_int16_t		x;
 }					t_file;
 
-t_file			*new_file(void);
-int				add_file(t_file **file, char *str);
-void			destroy_file(t_file **file);
-void			sort(t_file **ls, int flag);
-t_file			*t_partition(t_file *left, t_file **left1,
+t_file				*new_file(void);
+int					add_file(t_file **file, char *str);
+void				destroy_file(t_file **file);
+void				sort(t_file **ls, int flag);
+t_file				*t_partition(t_file *left, t_file **left1,
 	t_file *right, t_file **right1);
-t_file			*not_t_partition(t_file *left, t_file **left1,
+t_file				*not_t_partition(t_file *left, t_file **left1,
 	t_file *right, t_file **right1);
-void			open_dir(t_file *directory);
-t_file			*write_files(t_file *file);
-void			error(char *str);
-void			usage(char c, char *str);
-void			output_long(t_file *file);
-void			output_columns(t_file *file);
-int				get_stats(t_file *file);
-void			get_date(t_file *file);
-void			get_ug_name(t_file *file);
-void			get_rights(t_file *file);
-void			output_file(t_file *file);
-void			get_info(t_file **file, char *path, char *str);
-int				ft_add_color(t_file *file);
+void				open_dir(t_file *directory);
+t_file				*write_files(t_file *file);
+void				error_handler(char *str);
+void				usage(char c, char *str);
+void				output_long(t_file *file);
+void				output_columns(t_file *file);
+int					get_stats(t_file *file);
+void				get_date(t_file *file);
+void				get_ug_name(t_file *file);
+void				get_rights(t_file *file);
+void				output_file(t_file *file);
+void				get_info(t_file **file, char *path, char *str);
+int					ft_add_color(t_file *file);
 
 #endif

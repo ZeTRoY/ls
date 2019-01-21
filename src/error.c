@@ -6,13 +6,13 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:53:44 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 11:25:11 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 11:52:51 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ls.h"
 
-void	error(char *str)
+void	error_handler(char *str)
 {
 	write(2, "ls: ", 4);
 	if (!str[0])

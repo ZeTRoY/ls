@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:29:28 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 11:28:50 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 11:53:05 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,12 +96,12 @@ int			main(int argc, char **argv)
 	file = new_file();
 	i = ft_parse_options(file, argc, argv);
 	if (argc == i + 1)
-		stat(".", &file->st) == 0 ? add_file(&file, ".") : error(".");
+		stat(".", &file->st) == 0 ? add_file(&file, ".") : error_handler(".");
 	(argc - i > 2) ? file->flag |= WR_PTH : 0;
 	while (++i < argc)
 	{
 		if (file->flag & FG_L || (index = stat(argv[i], &ds)) < 0)
-			(index = lstat(argv[i], &ds)) < 0 ? error(argv[i]) : 0;
+			(index = lstat(argv[i], &ds)) < 0 ? error_handler(argv[i]) : 0;
 		index == 0 ? add_file(&file, argv[i]) && ft_memcpy(&file->st, &ds,
 			sizeof(struct stat)) && get_stats(file) : 0;
 	}
