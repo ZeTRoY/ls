@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:29:28 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 11:53:05 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 13:09:23 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int			is_option(char c, u_int32_t *flag)
 			& ~FG_C) & ~FG_L) & ~FG_M : (((((*flag) | FG_L)
 				& ~FG_C) & ~FG_ONE) & ~FG_M);
 	else if (c == 'r' || c == 'n')
-		(*flag) = c == 'l' ? (*flag) | FG_R : (((((*flag) | FG_L | FG_N)
+		(*flag) = c == 'r' ? (*flag) | FG_R : (((((*flag) | FG_L | FG_N)
 			& ~FG_C) & ~FG_ONE) & ~FG_M);
 	else if (c == 'g' || c == 'o')
 		(*flag) = c == 'g' ? (((((*flag) | FG_L | FG_G) & ~FG_C) & ~FG_ONE) &
