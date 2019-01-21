@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:49:58 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 19:47:00 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 20:03:24 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ static int	isnt_proper_name(DIR *dir, t_file **file)
 {
 	t_file *tmp;
 
+	*file = (*file)->addr;
 	if (!(*file)->name)
 	{
 		while (*file)
@@ -36,14 +37,14 @@ static DIR	*create_file(t_file *directory, t_file **file)
 	struct dirent	*ds;
 	char			*path;
 
+	*file = new_file();
 	path = directory->path ? directory->path : directory->name;
 	directory->flag |= directory->flag & IS_FILE ?
 		write(1, "\n", 1) & 0 : IS_FILE;
 	directory->flag & WR_PTH ? write(1, path, ft_strlen(path)) &&
-		write(1, ":\n", 2) : 0;// ft_printf("%s:\n", path) : 0;
+		write(1, ":\n", 2) : 0;
 	directory->flag |= WR_PTH;
-	(*file)->flag = directory->flag;
-	if (!(dir = opendir(path)))
+	if (((*file)->flag = directory->flag) && !(dir = opendir(path)))
 	{
 		error_handler(directory->name);
 		destroy_file(file);
@@ -55,7 +56,6 @@ static DIR	*create_file(t_file *directory, t_file **file)
 			continue ;
 		get_info(file, path, ds->d_name);
 	}
-	*file = (*file)->addr;
 	return (dir);
 }
 
@@ -81,10 +81,9 @@ void		open_dir(t_file *directory)
 	DIR				*dir;
 	t_file			*tmp;
 	t_file			*file;
-	
-	file = new_file();
-	if ((dir = create_file(directory, &file)) == NULL ||
-			isnt_proper_name(dir, &file))
+
+	if (((dir = create_file(directory, &file)) == NULL ||
+			isnt_proper_name(dir, &file)) && destroy_file(&file))
 		return ;
 	if (!(file->flag & FG_F))
 	{

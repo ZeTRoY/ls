@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:46:14 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/19 20:57:31 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 20:06:27 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ t_file		*new_file(void)
 	file->user = NULL;
 	file->group = NULL;
 	file->path = NULL;
-	// file->size = NULL;
 	file->addr = file;
 	file->next = NULL;
 	file->ind.date = 1;
@@ -54,19 +53,20 @@ int			add_file(t_file **file, char *str)
 	return (1);
 }
 
-void		destroy_file(t_file **file)
+int			destroy_file(t_file **file)
 {
 	t_file *tmp;
 
 	tmp = *file;
 	if (!tmp)
-		return ;
+		return (1);
 	free(tmp->name);
 	ft_strdel(&tmp->path);
 	free(tmp->user);
 	free(tmp->group);
-	// if (tmp->acl != NULL)
-	acl_free((void *)tmp->acl);
+	if (tmp->acl != NULL)
+		acl_free((void *)tmp->acl);
 	free(tmp);
 	*file = NULL;
+	return (1);
 }

@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:55:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 19:45:19 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 20:07:42 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ static void	write_acl(t_file *file)
 	write(1, tmp[4], ft_strlen(tmp[4]));
 	write(1, " ", 1);
 	write(1, tmp[5], ft_strlen(tmp[5]));
-	acl_free(text); //mb leaks? acl_free?
+	acl_free(text);
 	ft_freearr((void **)tmp);
 }
 
@@ -76,7 +76,6 @@ static void	ft_get_xattr(t_file *file)
 			write(1, "\t", 1);
 			ft_printf("%4d", size);
 			write(1, "\n", 1);
-			// ft_printf("\t%s\t%4d\n", xattr, size);
 			xattr += ft_strlen(xattr) + 1;
 		}
 	}
@@ -98,7 +97,7 @@ static void	out_link(t_file *file)
 		else
 			readlink(file->name, buff, 4095) > 0 ?
 				write(1, buff, ft_strlen(buff)) : 0;
-			write(1, "\n", 1);
+		write(1, "\n", 1);
 		free(buff);
 	}
 	else
@@ -127,7 +126,6 @@ void		output_long(t_file *file)
 	else
 		ft_printf("%3d, %3d ", major(file->st.st_rdev),
 			minor(file->st.st_rdev));
-	// ft_printf("%s ", file->date);
 	write(1, file->date, ft_strlen(file->date));
 	write(1, " ", 1);
 	(file->flag & FG_COLOR) && ft_add_color(file) ?

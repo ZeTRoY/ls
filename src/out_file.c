@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:57:29 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 13:03:16 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 20:04:42 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ static void	output_m(t_file *file)
 			ft_putchar('\n');
 		}
 		(file->flag & FG_COLOR) && ft_add_color(file) ?
-			quick_write(file->name) && write(1, "\033[0m, ", 6):
+			quick_write(file->name) && write(1, "\033[0m, ", 6) :
 				quick_write(file->name) && write(1, ", ", 2);
 	}
 }
@@ -75,7 +75,6 @@ static char	*make_new_path(char *path, char *str)
 		new = ft_strjoin(tmp, str);
 		free(tmp);
 	}
-	// printf("%s and %s\n", dir->path, dir->name);
 	return (new);
 }
 

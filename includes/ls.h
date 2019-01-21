@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 11:53:41 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 19:54:54 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ typedef struct		s_file
 
 t_file				*new_file(void);
 int					add_file(t_file **file, char *str);
-void				destroy_file(t_file **file);
+int					destroy_file(t_file **file);
 void				sort(t_file **ls, int flag);
 t_file				*t_partition(t_file *left, t_file **left1,
 	t_file *right, t_file **right1);
