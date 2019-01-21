@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:49:58 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 19:37:50 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/21 19:47:00 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ void		open_dir(t_file *directory)
 	t_file			*tmp;
 	t_file			*file;
 	
-	*file = new_file();
+	file = new_file();
 	if ((dir = create_file(directory, &file)) == NULL ||
 			isnt_proper_name(dir, &file))
 		return ;
