@@ -6,7 +6,7 @@
 #    By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/07 09:28:26 by aroi              #+#    #+#              #
-#    Updated: 2018/08/25 15:31:19 by aroi             ###   ########.fr        #
+#    Updated: 2019/01/19 20:54:15 by aroi             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,17 @@ NAME	=	ft_ls
 CC		=	gcc
 FLAGS	=	-Wall -Werror -Wextra
 
-FILES	=	main
+FILES	=	main \
+			open_dir \
+			out_file \
+			out_long \
+			info_long \
+			out_columns \
+			t_file_func \
+			quicksort \
+			quicksort_2 \
+			error
+
 
 LIBFT	=	libft
 SRC 	=	$(addprefix src/, $(addsuffix .c, $(FILES)))

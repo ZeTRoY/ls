@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2018/09/15 17:27:09 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/19 20:57:35 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <time.h>
 # include <sys/acl.h>
 # include <sys/xattr.h>
+# include <sys/ioctl.h>
 
 # define FG_C		0x1
 # define FG_ONE		0x2
@@ -31,18 +32,16 @@
 # define FG_A		0x10
 # define FG_R		0x20
 # define FG_T		0x40
-# define FG_D		0x80
+# define FG_O		0x80
 # define FG_G		0x100
 # define FG_F		0x200
 # define FG_COLOR	0x400
-# define FG_U		0x800
-# define FG_M		0x1000
-# define FG_N		0x2000
-# define FG_H		0x4000
-# define FG_ACL		0x8000
-# define FG_EA		0x10000
-# define WR_PTH		0x20000
-# define IS_FILE	0x40000
+# define FG_M		0x8000
+# define FG_N		0x1000
+# define FG_ACL		0x2000
+# define FG_EXA		0x4000
+# define WR_PTH		0x80000
+# define IS_FILE	0x10000
 
 typedef struct		s_indent
 {
@@ -64,12 +63,34 @@ typedef struct		s_file
 	char			*path;
 	char			*user;
 	char			*group;
-	// char			*size;
 	struct s_file	*addr;
 	struct s_file	*next;
 	struct stat		st;
 	t_indent		ind;
 	acl_t			acl;
+	u_int16_t		x;
 }					t_file;
+
+t_file			*new_file(void);
+int				add_file(t_file **file, char *str);
+void			destroy_file(t_file **file);
+void			sort(t_file **ls, int flag);
+t_file			*t_partition(t_file *left, t_file **left1,
+	t_file *right, t_file **right1);
+t_file			*not_t_partition(t_file *left, t_file **left1,
+	t_file *right, t_file **right1);
+void			open_dir(t_file *directory);
+t_file			*write_files(t_file *file);
+void			error(char *str);
+void			usage(char c, char *str);
+void			output_long(t_file *file);
+void			output_columns(t_file *file);
+int				get_stats(t_file *file);
+void			get_date(t_file *file);
+void			get_ug_name(t_file *file);
+void			get_rights(t_file *file);
+void			output_file(t_file *file);
+void			get_info(t_file **file, char *path, char *str);
+int				ft_add_color(t_file *file);
 
 #endif
