@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:33:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 19:13:57 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/25 10:35:08 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,14 +62,9 @@ void		get_ug_name(t_file *file)
 	struct group	*grpnam;
 
 	if (!(pwuser = getpwuid(file->st.st_uid)))
-	{
-		//
 		exit(errno);
-	}
 	if (!(grpnam = getgrgid(file->st.st_gid)))
-	{
 		exit(errno);
-	}
 	if (file->user)
 		free(file->user);
 	file->user = ft_strdup(pwuser->pw_name);

@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:49:58 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 20:03:24 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/25 10:23:25 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,8 @@ static DIR	*create_file(t_file *directory, t_file **file)
 	directory->flag & WR_PTH ? write(1, path, ft_strlen(path)) &&
 		write(1, ":\n", 2) : 0;
 	directory->flag |= WR_PTH;
-	if (((*file)->flag = directory->flag) && !(dir = opendir(path)))
+	(*file)->flag = directory->flag;
+	if (dir = opendir(path))
 	{
 		error_handler(directory->name);
 		destroy_file(file);
