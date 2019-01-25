@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/21 07:52:21 by aroi              #+#    #+#             */
-/*   Updated: 2018/08/21 09:02:37 by aroi             ###   ########.fr       */
+/*   Updated: 2019/01/25 16:00:06 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,9 @@ static void		swap(char **first, char **second)
 
 static int		partition(char **arr, int start, int end)
 {
-	char *pivot;
-	int left;
-	int right;
+	char	*pivot;
+	int		left;
+	int		right;
 
 	pivot = arr[end];
 	left = start - 1;
@@ -40,7 +40,7 @@ static int		partition(char **arr, int start, int end)
 		right++;
 	}
 	swap(&arr[left + 1], &arr[end]);
-	return(left + 1);
+	return (left + 1);
 }
 
 void			ft_quicksort_chars(char **arr, int start, int end)
