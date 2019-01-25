@@ -3,13 +3,13 @@ System function ls is recoded on this git repository.
 
 From BSD General Commands Manual:
 	
-	**NAME**
+	NAME
 		ls -- list directory contents
 
-	**SYNOPSIS**
-		**ls** [**-ABCFGHLOPRSTUW@abcdefghiklmnopqrstuwx1**] [file ...]
+	SYNOPSIS
+		ls [-ABCFGHLOPRSTUW@abcdefghiklmnopqrstuwx1] [file ...]
 
-	**DESCRIPTION**
+	DESCRIPTION
 		For each operand that names a file of a type other than directory, ls displays its name as well as any requested,
 		associated information.  For each operand that names a file of type directory, ls displays the names of files con-
 		tained within that directory, as well as any requested, associated information.
@@ -21,7 +21,7 @@ From BSD General Commands Manual:
 for more information search in BSD General Commands Manual.
 
 However the synopsis of my ls is:
-	**./ft_ls** [**-CGr@aefglmnort1**] [file ...]
+	./ft_ls [-CGr@aefglmnort1] [file ...]
 
 To compile a binary that will list directories you should do `make`.
 
@@ -32,3 +32,11 @@ To inititalise my ls you should write:
 ```
 That's it!
 Every option (such as -l or -a) is implemented due to the option of original ls, so u can watch how it works and compare with my function.
+
+Additional info:
+
+Makefile functions:
+- `make/make all` - compiles a binary named `ft_ls`;
+- `make clean` - removes every object file from `obj` directory;
+- `make fclean` - the same as `make clean` + removes binary file `ft_ls`;
+- `make re` - the same as `make fclean` + `make`.
