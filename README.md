@@ -33,6 +33,17 @@ However the synopsis of my ls is:
 That's it!
 Every option (such as -l or -a) is implemented due to the option of original ls, so u can watch how it works and compare with my function!
 
+Images of original ls and ft_ls:
+
+<img src="https://github.com/ZeTRoY/ls/blob/master/Images/Screen%20Shot%202019-01-25%20at%206.25.20%20PM.png">
+
+<img src="https://github.com/ZeTRoY/ls/blob/master/Images/Screen%20Shot%202019-01-25%20at%206.28.14%20PM.png">
+
+<img src="https://github.com/ZeTRoY/ls/blob/master/Images/Screen%20Shot%202019-01-25%20at%206.29.30%20PM.png">
+
+<img src="https://github.com/ZeTRoY/ls/blob/master/Images/Screen%20Shot%202019-01-25%20at%206.30.15%20PM.png">
+
+<img src="https://github.com/ZeTRoY/ls/blob/master/Images/Screen%20Shot%202019-01-25%20at%206.57.23%20PM.png">
 
 Additional info:
 
