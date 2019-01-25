@@ -21,17 +21,18 @@ From BSD General Commands Manual:
 for more information search in BSD General Commands Manual.
 
 However the synopsis of my ls is:
-	./ft_ls [-CGr@aefglmnort1] [file ...]
+```
+./ft_ls [-CGr@aefglmnort1] [file ...]
+```
 
-To compile a binary that will list directories you should do `make`.
-
-After what you can watch through any directory (if you have such permisions of course).
-To inititalise my ls you should write:
+**To compile a binary that will list directories** you should do **`make`**. After what you can watch through any directory (if you have such permisions of course).
+**To inititalise ft_ls** you should write:
 ```
 ./ft_ls
 ```
 That's it!
-Every option (such as -l or -a) is implemented due to the option of original ls, so u can watch how it works and compare with my function.
+Every option (such as -l or -a) is implemented due to the option of original ls, so u can watch how it works and compare with my function!
+
 
 Additional info:
 
