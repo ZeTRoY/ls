@@ -6,11 +6,19 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:45:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 19:39:46 by aroi             ###   ########.fr       */
+/*   Updated: 2019/02/08 16:30:35 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ls.h"
+
+static int	additional_colors(mode_t mode)
+{
+	if (!S_ISFIFO(mode))
+		return (0);
+	ft_putstr("\033[38;2;204;204;0m");
+	return (1);
+}
 
 int			ft_add_color(t_file *file)
 {
@@ -37,7 +45,7 @@ int			ft_add_color(t_file *file)
 			(S_IXOTH & file->st.st_mode))
 		ft_putstr("\033[31;49m");
 	else
-		return (0);
+		return (additional_colors(file->st.st_mode));
 	return (1);
 }
 
@@ -109,8 +117,8 @@ void		output_columns(t_file *file)
 	if (file->flag & FG_COLOR)
 		size = size + 1;
 	else
-		size += size % 8 == 0 ? 0 : 8 - size % 8;
-	while (win.ws_col / (n / row + ((n % row != 0) ? 1 : 0)) < size)
+		size += 8 - size % 8;
+	while ((n / row + ((n % row != 0) ? 1 : 0)) * size > win.ws_col)
 		row++;
 	output(file, row, size);
 }

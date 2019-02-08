@@ -6,7 +6,7 @@
 #    By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/07 09:28:26 by aroi              #+#    #+#              #
-#    Updated: 2019/01/25 18:32:14 by aroi             ###   ########.fr        #
+#    Updated: 2019/02/08 16:26:57 by aroi             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,8 @@ FILES	=	main \
 			t_file_func \
 			quicksort \
 			quicksort_2 \
-			error
+			error \
+			xattr_acl
 
 
 LIBFT	=	libft

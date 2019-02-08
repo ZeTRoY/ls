@@ -6,30 +6,11 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:55:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 20:07:42 by aroi             ###   ########.fr       */
+/*   Updated: 2019/02/08 16:32:13 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ls.h"
-
-static void	write_acl(t_file *file)
-{
-	char	**tmp;
-	char	*text;
-
-	text = acl_to_text(file->acl, NULL);
-	tmp = ft_strsplit(ft_strchr(text, '\n') + 1, ':');
-	write(1, " 0: ", 4);
-	write(1, tmp[0], ft_strlen(tmp[0]));
-	write(1, ":", 1);
-	write(1, tmp[2], ft_strlen(tmp[2]));
-	write(1, " ", 1);
-	write(1, tmp[4], ft_strlen(tmp[4]));
-	write(1, " ", 1);
-	write(1, tmp[5], ft_strlen(tmp[5]));
-	acl_free(text);
-	ft_freearr((void **)tmp);
-}
 
 int			get_stats(t_file *file)
 {
@@ -58,30 +39,6 @@ int			get_stats(t_file *file)
 	return (1);
 }
 
-static void	ft_get_xattr(t_file *file)
-{
-	char	list[1024];
-	char	*xattr;
-	int		size;
-
-	if (file->rights[10] == '@' && file->flag & FG_EXA)
-	{
-		xattr = list;
-		listxattr(file->path, list, 1024, XATTR_NOFOLLOW);
-		while (*xattr)
-		{
-			size = getxattr(file->path, xattr, NULL, 0, 0, XATTR_NOFOLLOW);
-			write(1, "\t", 1);
-			write(1, xattr, ft_strlen(xattr));
-			write(1, "\t", 1);
-			ft_printf("%4d", size);
-			write(1, "\n", 1);
-			xattr += ft_strlen(xattr) + 1;
-		}
-	}
-	file->acl && (file->flag & FG_ACL) ? write_acl(file) : 0;
-}
-
 static void	out_link(t_file *file)
 {
 	char	*buff;
@@ -105,19 +62,33 @@ static void	out_link(t_file *file)
 	ft_get_xattr(file);
 }
 
-void		output_long(t_file *file)
+void		ngo_options(t_file *file)
 {
-	if (file->flag & FG_N)
-		ft_printf("%-*d  %-*d  ", file->addr->ind.user, file->st.st_uid,
-			file->addr->ind.group, file->st.st_gid);
-	else
+	if (file->flag & FG_G)
 	{
-		if ((file->flag & FG_G) == 0)
-			ft_printf("%-*s  ", file->addr->ind.user, file->user);
-		if ((file->flag & FG_O) == 0)
+		if (file->flag & FG_O)
+			write(1, "  ", 2);
+		else if (file->flag & FG_N)
+			ft_printf("%-*d  ", file->addr->ind.group, file->st.st_gid);
+		else
 			ft_printf("%-*s  ", file->addr->ind.group, file->group);
 	}
-	(file->flag & FG_O) && (file->flag & FG_G) ? write(1, "  ", 2) : 0;
+	else if (file->flag & FG_O)
+		file->flag & FG_N ?
+		ft_printf("%-*d  ", file->addr->ind.user, file->st.st_uid) :
+		ft_printf("%-*s  ", file->addr->ind.user, file->user);
+	else
+		ft_printf("%-*d  %-*d  ", file->addr->ind.user, file->st.st_uid,
+			file->addr->ind.group, file->st.st_gid);
+}
+
+void		output_long(t_file *file)
+{
+	if (file->flag & FG_G || file->flag & FG_N || file->flag & FG_O)
+		ngo_options(file);
+	else
+		ft_printf("%-*s  %-*s  ", file->addr->ind.user, file->user,
+			file->addr->ind.group, file->group);
 	if (file->rights[0] != 'b' && file->rights[0] != 'c')
 		ft_printf("%*d ", file->addr->ind.size, file->st.st_size);
 	else if (minor(file->st.st_rdev) > 255 || minor(file->st.st_rdev) < 0)

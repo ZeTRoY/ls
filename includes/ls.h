@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/08/07 09:36:18 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 19:54:54 by aroi             ###   ########.fr       */
+/*   Updated: 2019/02/08 16:27:12 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,5 +92,6 @@ void				get_rights(t_file *file);
 void				output_file(t_file *file);
 void				get_info(t_file **file, char *path, char *str);
 int					ft_add_color(t_file *file);
+void				ft_get_xattr(t_file *file);
 
 #endif

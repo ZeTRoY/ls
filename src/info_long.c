@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 20:33:21 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/25 10:35:08 by aroi             ###   ########.fr       */
+/*   Updated: 2019/02/08 16:28:43 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ void		get_date(t_file *file)
 		difference = file->st.st_mtime - current_time;
 	if (difference > 15778463)
 		ft_memcpy((void *)(file->date + 7), ft_strrchr(time_str, ' '), 6);
-	!ft_isdigit(file->date[12]) ? file->date[12] = '\0' : 0;
+	if (file->date[12] == '\n' || file->date[9] == ':')
+		file->date[12] = '\0';
 	if ((tmp = ft_strlen(time_str)) > file->addr->ind.date)
 		file->addr->ind.date = tmp;
 }
