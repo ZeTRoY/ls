@@ -6,7 +6,7 @@
 /*   By: aroi <aroi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/19 19:57:29 by aroi              #+#    #+#             */
-/*   Updated: 2019/01/21 20:04:42 by aroi             ###   ########.fr       */
+/*   Updated: 2019/02/19 15:17:12 by aroi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,8 @@ static char	*make_new_path(char *path, char *str)
 	new = 0;
 	if (!path)
 		new = ft_strdup(str);
+	else if (path[1] == '\0' && path[0] == '/')
+		new = ft_strjoin("/", str);
 	else
 	{
 		tmp = ft_strjoin(path, "/");
